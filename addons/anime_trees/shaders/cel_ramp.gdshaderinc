@@ -5,13 +5,15 @@
 global uniform int anime_tree_bake_mode;
 global uniform vec2 anime_tree_bake_depth_range; // view-space near/far of the baked object
 
-const float CEL_BAND_HI = 0.55;
-const float CEL_BAND_LO = 0.15;
+// Wrapped bands: the refs keep side/under faces mid-tone, only the far side goes dark.
+const float CEL_BAND_HI = 0.1;
+const float CEL_BAND_LO = -0.55;
 
-// 2 = lit, 1 = mid, 0 = dark. `shift` (0/1) lowers the band, used for blotches.
+// 2 = lit, 1 = mid, 0 = dark. Being in shadow drops one band (hard threshold, so soft
+// shadow filtering never dithers). `shift` (0/1) lowers the band, used for blotches.
 int cel_band(float ndotl, float shadow, int shift) {
-	float l = ndotl * shadow;
-	int b = l > CEL_BAND_HI ? 2 : (l > CEL_BAND_LO ? 1 : 0);
+	int b = ndotl > CEL_BAND_HI ? 2 : (ndotl > CEL_BAND_LO ? 1 : 0);
+	b -= shadow < 0.5 ? 1 : 0;
 	return max(b - shift, 0);
 }
 

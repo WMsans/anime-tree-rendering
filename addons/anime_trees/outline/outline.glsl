@@ -3,6 +3,8 @@
 // Ink outline. Depth edges: second derivative of reverse-Z NDC depth (zero on planes,
 // so ground at grazing angles stays clean), only on the nearer side of a step, so the ink
 // takes the color of the object in front. Normal edges: one-sided (+x/+y) to keep width.
+// Id edges: foliage writes a per-clump id as roughness; where it changes, the nearer pixel
+// gets ink, so neighbouring clumps at almost equal depth still get separated (refs 1, 2).
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -41,9 +43,9 @@ void main() {
 		return; // sky (reverse Z far plane)
 	}
 	vec4 nr = normal_rough_at(px);
-	if (nr.w > 0.99) {
-		return; // no-outline flag (impostors carry baked ink)
-	}
+	// Impostor flag: baked ink inside, but it vanishes under minification, so they still
+	// take depth (silhouette / clump-step) edges at screen width here; no normal edges.
+	bool imp = nr.w > 0.99;
 	int w = max(1, int(round(p.width)));
 	const ivec2 dirs[4] = ivec2[](ivec2(1, 0), ivec2(0, 1), ivec2(1, 1), ivec2(1, -1));
 	bool edge = false;
@@ -51,13 +53,18 @@ void main() {
 		ivec2 o = dirs[i] * w;
 		float lap = 2.0 * d - depth_at(px + o) - depth_at(px - o);
 		edge = lap / d > p.depth_threshold;
-		if (!edge && i < 2) {
+		if (!edge && i < 2 && !imp) {
 			ivec2 q = px + dirs[i] * w;
 			if (depth_at(q) > 0.0) {
 				vec4 nq = normal_rough_at(q);
 				edge = nq.w <= 0.99 && 1.0 - dot(nr.xyz, nq.xyz) > p.normal_threshold;
 			}
 		}
+	}
+	for (int i = 0; i < 4 && !edge; i++) {
+		ivec2 q = px + (i < 2 ? 1 : -1) * dirs[i & 1] * w;
+		float dq = depth_at(q);
+		edge = d >= dq && abs(normal_rough_at(q).w - nr.w) > 0.012;
 	}
 	if (edge) {
 		vec4 c = imageLoad(color_image, px);

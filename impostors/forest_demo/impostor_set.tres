@@ -34,8 +34,8 @@ shader_parameter/albedo_atlas = ExtResource("2_xvexo")
 shader_parameter/ndsh_atlas = ExtResource("3_bc7li")
 shader_parameter/impostor_center = Vector3(-0.48282623, 8.654067, -0.07360363)
 shader_parameter/impostor_radius = 13.902786
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xvexo"]
@@ -45,8 +45,8 @@ shader_parameter/albedo_atlas = ExtResource("4_6xw7h")
 shader_parameter/ndsh_atlas = ExtResource("5_cw60u")
 shader_parameter/impostor_center = Vector3(-0.6902094, 9.163603, 0.20653915)
 shader_parameter/impostor_radius = 14.626352
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bc7li"]
@@ -56,74 +56,8 @@ shader_parameter/albedo_atlas = ExtResource("6_f8m8g")
 shader_parameter/ndsh_atlas = ExtResource("7_ir0c3")
 shader_parameter/impostor_center = Vector3(0.21634007, 8.489374, -0.5049534)
 shader_parameter/impostor_radius = 13.704454
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_6xw7h"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("8_pgfdl")
-shader_parameter/ndsh_atlas = ExtResource("9_eav33")
-shader_parameter/impostor_center = Vector3(-0.09904432, 13.004213, 0.34506083)
-shader_parameter/impostor_radius = 14.933306
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_cw60u"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("10_7m2gi")
-shader_parameter/ndsh_atlas = ExtResource("11_ang4l")
-shader_parameter/impostor_center = Vector3(-0.45491505, 14.913441, 0.25851202)
-shader_parameter/impostor_radius = 17.85949
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_f8m8g"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("12_haubw")
-shader_parameter/ndsh_atlas = ExtResource("13_neb4x")
-shader_parameter/impostor_center = Vector3(0.113102436, 14.025781, -0.6688628)
-shader_parameter/impostor_radius = 16.497536
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ir0c3"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("14_wphx5")
-shader_parameter/ndsh_atlas = ExtResource("15_j1y1k")
-shader_parameter/impostor_center = Vector3(0.62052727, 6.5870967, -3.1181993)
-shader_parameter/impostor_radius = 10.350424
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_pgfdl"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("16_g787g")
-shader_parameter/ndsh_atlas = ExtResource("17_840jj")
-shader_parameter/impostor_center = Vector3(3.526732, 6.934257, -1.3269763)
-shader_parameter/impostor_radius = 9.879225
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
-shader_parameter/alpha_cut = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_eav33"]
-render_priority = 0
-shader = ExtResource("1_81xpc")
-shader_parameter/albedo_atlas = ExtResource("18_7033e")
-shader_parameter/ndsh_atlas = ExtResource("19_xuh3o")
-shader_parameter/impostor_center = Vector3(-0.7858329, 6.1435976, -3.441372)
-shader_parameter/impostor_radius = 9.372835
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7m2gi"]
@@ -133,8 +67,8 @@ shader_parameter/albedo_atlas = ExtResource("20_jugx3")
 shader_parameter/ndsh_atlas = ExtResource("21_2a8ro")
 shader_parameter/impostor_center = Vector3(-0.09850001, 2.7177558, -0.32607603)
 shader_parameter/impostor_radius = 4.495845
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ang4l"]
@@ -144,8 +78,8 @@ shader_parameter/albedo_atlas = ExtResource("22_tqf5h")
 shader_parameter/ndsh_atlas = ExtResource("23_wahkc")
 shader_parameter/impostor_center = Vector3(0.38491797, 2.92919, -0.2047286)
 shader_parameter/impostor_radius = 4.9391813
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_haubw"]
@@ -155,8 +89,74 @@ shader_parameter/albedo_atlas = ExtResource("24_03hrf")
 shader_parameter/ndsh_atlas = ExtResource("25_24jta")
 shader_parameter/impostor_center = Vector3(0.041275978, 2.8026865, -0.0677433)
 shader_parameter/impostor_radius = 4.659243
-shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
-shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6xw7h"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("8_pgfdl")
+shader_parameter/ndsh_atlas = ExtResource("9_eav33")
+shader_parameter/impostor_center = Vector3(-0.09904432, 13.004213, 0.34506083)
+shader_parameter/impostor_radius = 14.933306
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cw60u"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("10_7m2gi")
+shader_parameter/ndsh_atlas = ExtResource("11_ang4l")
+shader_parameter/impostor_center = Vector3(-0.45491505, 14.913441, 0.25851202)
+shader_parameter/impostor_radius = 17.85949
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f8m8g"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("12_haubw")
+shader_parameter/ndsh_atlas = ExtResource("13_neb4x")
+shader_parameter/impostor_center = Vector3(0.113102436, 14.025781, -0.6688628)
+shader_parameter/impostor_radius = 16.497536
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ir0c3"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("14_wphx5")
+shader_parameter/ndsh_atlas = ExtResource("15_j1y1k")
+shader_parameter/impostor_center = Vector3(0.62052727, 6.5870967, -3.1181993)
+shader_parameter/impostor_radius = 10.350424
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pgfdl"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("16_g787g")
+shader_parameter/ndsh_atlas = ExtResource("17_840jj")
+shader_parameter/impostor_center = Vector3(3.526732, 6.934257, -1.3269763)
+shader_parameter/impostor_radius = 9.879225
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eav33"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("18_7033e")
+shader_parameter/ndsh_atlas = ExtResource("19_xuh3o")
+shader_parameter/impostor_center = Vector3(-0.7858329, 6.1435976, -3.441372)
+shader_parameter/impostor_radius = 9.372835
+shader_parameter/mid_ratio = Vector3(0.5322927, 0.7128452, 0.52566135)
+shader_parameter/dark_ratio = Vector3(0.26278138, 0.44768256, 0.43243316)
 shader_parameter/alpha_cut = 0.25
 
 [resource]

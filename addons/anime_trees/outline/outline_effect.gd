@@ -2,7 +2,7 @@
 class_name OutlineEffect
 extends CompositorEffect
 ## Screen-space ink outline (spec §5). Add to a Camera3D's Compositor.
-## Impostors opt out by writing ROUGHNESS = 1.0 (they carry baked ink).
+## Impostors write ROUGHNESS = 1.0: depth edges only (they carry baked interior ink).
 
 @export var line_width_px := 3.0  ## at 1080p, scaled with render height
 @export var depth_threshold := 0.02
