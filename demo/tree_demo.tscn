@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://bh0i83yxhvy4v"]
+
+[ext_resource type="Script" uid="uid://s42q0m03c4d7" path="res://demo/src/free_camera.gd" id="1_cam"]
+[ext_resource type="Script" uid="uid://cet6jjfpmyl20" path="res://demo/src/outline_post_process.gd" id="2_post"]
+[ext_resource type="PackedScene" uid="uid://berffyybdkqke" path="res://assets/trees/tree_a.glb" id="3_ta"]
+[ext_resource type="PackedScene" uid="uid://bjrfan427vyb8" path="res://assets/trees/tree_b.glb" id="4_tb"]
+[ext_resource type="PackedScene" uid="uid://boohind0tx1f2" path="res://assets/trees/tree_c.glb" id="5_tc"]
+[ext_resource type="PackedScene" uid="uid://40nbprgajali" path="res://assets/trees/pine_a.glb" id="6_pa"]
+[ext_resource type="PackedScene" uid="uid://chstk76yatf6d" path="res://assets/trees/pine_b.glb" id="7_pb"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.23520002, 0.4834668, 0.98, 1)
+sky_horizon_color = Color(0.54940003, 0.59563, 0.67, 1)
+ground_bottom_color = Color(0.23779999, 0.25781, 0.29, 1)
+ground_horizon_color = Color(0.54901963, 0.59607846, 0.67058825, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+
+[sub_resource type="StandardMaterial3D" id="mat_ground"]
+albedo_color = Color(0.45, 0.62, 0.3, 1)
+
+[sub_resource type="PlaneMesh" id="ground"]
+material = SubResource("mat_ground")
+size = Vector2(80, 80)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aulnb"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_jrnmm"]
+material = SubResource("StandardMaterial3D_aulnb")
+
+[node name="TreeDemo" type="Node3D" unique_id=1015444229]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2062372999]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1206634457]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1115234926]
+transform = Transform3D(1, 0, 0, 0, 0.9888, -0.1494, 0, 0.1494, 0.9888, 0, 5, 24)
+current = true
+script = ExtResource("1_cam")
+
+[node name="OutlinePostProcess" type="Node3D" parent="." unique_id=153322400]
+script = ExtResource("2_post")
+depth_threshold = 2.0
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=745682141]
+mesh = SubResource("ground")
+
+[node name="Trees" type="Node3D" parent="." unique_id=605533023]
+
+[node name="TreeA" parent="Trees" unique_id=151336249 instance=ExtResource("3_ta")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 0)
+
+[node name="TreeB" parent="Trees" unique_id=1953588845 instance=ExtResource("4_tb")]
+transform = Transform3D(0.707, 0, 0.707, 0, 1, 0, -0.707, 0, 0.707, 0, 0, -4)
+
+[node name="TreeC" parent="Trees" unique_id=642002327 instance=ExtResource("5_tc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 0)
+
+[node name="PineA" parent="Trees" unique_id=738076406 instance=ExtResource("6_pa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -10)
+
+[node name="PineB" parent="Trees" unique_id=2125161142 instance=ExtResource("7_pb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -12)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1347736103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0509515, 0.93200564, 9.025875)
+mesh = SubResource("SphereMesh_jrnmm")
