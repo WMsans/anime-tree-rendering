@@ -2,7 +2,8 @@
 ##
 ## Bands the lit image by luminance through [member ramp]. Needs
 ## view-independent lighting (no specular or sky reflections, Lambert diffuse)
-## or bands flicker as the camera moves. Runs just before [OutlinePostProcess], so lines stay on top.
+## or bands flicker as the camera moves. Use flat neutral ambient (not sky) and
+## hard shadow filtering, or bands get muddy hue shifts and speckled edges. Runs just before [OutlinePostProcess], so lines stay on top.
 class_name CelShadingPostProcess
 extends Node3D
 

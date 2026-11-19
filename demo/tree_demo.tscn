@@ -21,7 +21,8 @@ sky_material = SubResource("sky_mat")
 [sub_resource type="Environment" id="env"]
 background_mode = 2
 sky = SubResource("sky")
-ambient_light_source = 3
+ambient_light_source = 2
+ambient_light_color = Color(0.45, 0.45, 0.45, 1)
 reflected_light_source = 1
 
 [sub_resource type="StandardMaterial3D" id="mat_ground"]

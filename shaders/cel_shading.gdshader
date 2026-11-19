@@ -7,7 +7,10 @@ render_mode unshaded, cull_disabled, depth_test_disabled, depth_draw_never, fog_
 // Lighting is already baked into the screen colour, so the bands come from its
 // luminance: the ramp maps luminance to a new luminance (and optional tint),
 // hue is kept. The ramp needs view-independent input: no specular, no sky
-// reflections, Lambert diffuse, or bands flicker as the camera moves.
+// reflections, Lambert diffuse, or bands flicker as the camera moves. Ambient must
+// be a flat neutral colour (not sky): hue is taken from the lit pixel, so tinted,
+// normal-dependent ambient leaks into the bands as muddy hue shifts. Use hard
+// shadow filtering too; soft-shadow noise turns into speckle at band edges.
 
 // Luminance in, banded colour out. Use a constant-interpolation gradient.
 uniform sampler2D ramp : source_color, filter_nearest, repeat_disable;
