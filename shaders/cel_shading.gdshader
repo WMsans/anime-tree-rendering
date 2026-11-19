@@ -26,7 +26,7 @@ void vertex() {
 
 void fragment() {
 	vec2 uv = leaf_source(SCREEN_UV, depth_texture, normal_roughness_texture,
-			INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+			INV_PROJECTION_MATRIX);
 	vec3 col = texture(screen_texture, uv).rgb;
 	float d = texture(depth_texture, uv).r;
 	// Reverse-Z: 0 is the far plane, i.e. sky. Leave it smooth.

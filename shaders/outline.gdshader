@@ -58,16 +58,15 @@ void fragment() {
 	vec2 o = thickness / vec2(textureSize(depth_texture, 0));
 	// Every tap goes through leaf_source, so lines follow the grown leaf edges.
 	mat4 ip = INV_PROJECTION_MATRIX;
-	mat4 iv = INV_VIEW_MATRIX;
 	vec2 tl = SCREEN_UV - vec2(o.x, 0.0);
 	vec2 tr = SCREEN_UV + vec2(o.x, 0.0);
 	vec2 tu = SCREEN_UV - vec2(0.0, o.y);
 	vec2 td = SCREEN_UV + vec2(0.0, o.y);
-	vec2 m = leaf_source(SCREEN_UV, depth_texture, normal_roughness_texture, ip, iv);
-	vec2 l = leaf_source(tl, depth_texture, normal_roughness_texture, ip, iv);
-	vec2 r = leaf_source(tr, depth_texture, normal_roughness_texture, ip, iv);
-	vec2 u = leaf_source(tu, depth_texture, normal_roughness_texture, ip, iv);
-	vec2 dn = leaf_source(td, depth_texture, normal_roughness_texture, ip, iv);
+	vec2 m = leaf_source(SCREEN_UV, depth_texture, normal_roughness_texture, ip);
+	vec2 l = leaf_source(tl, depth_texture, normal_roughness_texture, ip);
+	vec2 r = leaf_source(tr, depth_texture, normal_roughness_texture, ip);
+	vec2 u = leaf_source(tu, depth_texture, normal_roughness_texture, ip);
+	vec2 dn = leaf_source(td, depth_texture, normal_roughness_texture, ip);
 	float c = view_depth(m, INV_PROJECTION_MATRIX);
 	float zl = view_depth(l, INV_PROJECTION_MATRIX);
 	float zr = view_depth(r, INV_PROJECTION_MATRIX);

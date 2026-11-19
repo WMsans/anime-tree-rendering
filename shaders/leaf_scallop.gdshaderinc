@@ -1,69 +1,66 @@
 // Screen-space scalloped leaf edges, shared by cel_shading and outline so both see
 // the same grown shape. A non-leaf pixel near a leaf edge "becomes" that leaf (its
 // colour and depth) when it falls inside a round bump growing out of the edge.
-// Bumps are anchored to the leaf's world position, sized in metres: they don't
-// crawl with the camera and shrink with distance.
 //
-// Leaf pixels are marked by the leaf material writing ROUGHNESS = 0.5.
+// The leaf material (leaf.gdshader) writes ROUGHNESS = 0.25 + 0.5 * profile:
+// 0.25..0.75 marks a leaf pixel, and profile (0..1) is the bump height there,
+// computed per clump so the bumps don't crawl. Other surfaces are 1.0, sky 0.
 
-// Biggest bump radius, metres.
+// Biggest bump radius, metres. Bumps scale with distance like the geometry.
 uniform float bump_size = 0.5;
-// Bump frequency over world space; bump spacing is about PI / bump_freq metres.
-uniform float bump_freq = 4.5;
-// Weight of the finer sub-bumps on top of the main ones.
-uniform float sub_bump_strength = 0.35;
 // Search radius cap in pixels: bumps on very near leaves are clamped to this.
-uniform float max_grow_px = 40.0;
+uniform float max_grow_px = 256.0;
 
-const int GROW_RINGS = 8;
+// Rings are spaced exponentially from MIN_RING_PX to max_grow_px: fine near the
+// edge (small, far bumps), coarse far out (big, near bumps).
+const int GROW_RINGS = 10;
 const int GROW_DIRS = 16;
+const float MIN_RING_PX = 2.0;
 const float SAMPLE_INSET_PX = 4.0;
 
-bool is_leaf(sampler2D nr_tex, vec2 uv) {
-	// w is the raw roughness (measured in 4.7): leaves 0.5, other surfaces 1.0,
-	// sky 0.
-	return abs(texture(nr_tex, uv).w - 0.5) < 0.1;
+float leaf_w(sampler2D nr_tex, vec2 uv) {
+	// w is the raw roughness (measured in Godot 4.7).
+	return texture(nr_tex, uv).w;
 }
 
-// Bump radius, 0..1 of bump_size, at a world position: smooth lobes with cusps.
-float bump_profile(vec3 w) {
-	vec3 s = sin(w * bump_freq + vec3(0.0, 1.7, 3.1));
-	vec3 s2 = sin(w.zxy * bump_freq * 2.3 + vec3(2.3, 0.4, 5.0));
-	float n = mix(s.x + s.y + s.z, s2.x + s2.y + s2.z, sub_bump_strength) / 3.0 * 0.5 + 0.5;
-	// Most of the range near zero (cusps), round tops (sqrt).
-	return sqrt(smoothstep(0.35, 0.85, n));
+bool is_leaf(sampler2D nr_tex, vec2 uv) {
+	return abs(leaf_w(nr_tex, uv) - 0.5) < 0.26;
+}
+
+float ring_px(int i) {
+	return i == 0 ? 0.0 : MIN_RING_PX * pow(max_grow_px / MIN_RING_PX, float(i - 1) / float(GROW_RINGS - 1));
 }
 
 // The uv whose colour and depth this pixel should show: itself, or the leaf pixel
 // whose bump covers it.
 // ponytail: brute-force ring search, run once per pixel in cel shading and 5x in
 // the outline; jump flooding in a CompositorEffect if it ever costs too much.
-vec2 leaf_source(vec2 uv, sampler2D depth_tex, sampler2D nr_tex, mat4 inv_proj, mat4 inv_view) {
+vec2 leaf_source(vec2 uv, sampler2D depth_tex, sampler2D nr_tex, mat4 inv_proj) {
 	if (is_leaf(nr_tex, uv)) {
 		return uv;
 	}
 	vec2 size = vec2(textureSize(depth_tex, 0));
 	vec2 px = 1.0 / size;
 	float pd = texture(depth_tex, uv).r;
-	float step_px = max_grow_px / float(GROW_RINGS);
 	for (int i = 1; i <= GROW_RINGS; i++) {
-		float rad = step_px * float(i);
+		float rad = ring_px(i);
 		// First ring that hits a leaf: bisect every hit towards its edge and keep the
-		// closest, so the distance (and the leaf point) is stable pixel to pixel and
-		// bump outlines aren't quantised to the ring step.
+		// closest. This pixel grows when it's within the bump height at that nearest
+		// edge point, so the grown edge traces the profile: semicircle profile,
+		// semicircle scallops.
 		float best = 1e6;
 		float best_hi = 0.0;
+		vec2 best_dir = vec2(0.0);
 		vec2 dir_sum = vec2(0.0);
-		vec2 q = uv;
 		for (int j = 0; j < GROW_DIRS; j++) {
-			float a = (float(j) + 0.5 * float(i % 2)) * TAU / float(GROW_DIRS);
+			float a = (float(j) + 0.5) * TAU / float(GROW_DIRS);
 			vec2 dir = vec2(cos(a), sin(a));
 			if (!is_leaf(nr_tex, uv + dir * rad * px)) {
 				continue;
 			}
-			float lo = rad - step_px;
+			float lo = ring_px(i - 1);
 			float hi = rad;
-			for (int k = 0; k < 4; k++) {
+			for (int k = 0; k < 6; k++) {
 				float mid = 0.5 * (lo + hi);
 				if (is_leaf(nr_tex, uv + dir * mid * px)) {
 					hi = mid;
@@ -74,41 +71,35 @@ vec2 leaf_source(vec2 uv, sampler2D depth_tex, sampler2D nr_tex, mat4 inv_proj, 
 			if (lo < best) {
 				best = lo;
 				best_hi = hi;
-				q = uv + dir * (hi + SAMPLE_INSET_PX) * px;
+				best_dir = dir;
 			}
 			dir_sum += dir;
 		}
-		if (best < 1e6) {
-			// Colour/depth source: along the mean hit direction (a smooth edge normal)
-			// and a few pixels inside the leaf. The single closest direction jumps
-			// between neighbours and smears different cel bands into hairs; right at
-			// the silhouette the surface is grazing and flickers.
-			if (dot(dir_sum, dir_sum) > 0.25) {
-				vec2 qa = uv + normalize(dir_sum) * (best_hi + SAMPLE_INSET_PX) * px;
-				if (is_leaf(nr_tex, qa)) {
-					q = qa;
-				}
-			}
-			float lo = best;
-			float qd = texture(depth_tex, q).r;
-			// Reverse-Z: bigger is nearer. Only grow over farther surfaces.
-			if (qd <= pd) {
-				return uv;
-			}
-			vec4 v = inv_proj * vec4(q * 2.0 - 1.0, qd, 1.0);
-			v.xyz /= v.w;
-			vec3 w = (inv_view * vec4(v.xyz, 1.0)).xyz;
-			// Depth is noisy at grazing silhouettes; drop the pattern's view-direction
-			// component so that noise can't jitter the bump outline. Still anchored
-			// for camera moves; drifts a little under camera rotation.
-			vec3 fwd = -normalize(inv_view[2].xyz);
-			w -= dot(w - inv_view[3].xyz, fwd) * fwd;
-			// Pixels per metre at this distance; |inv_proj[1][1]| is tan(fov_y / 2) (sign
-			// depends on the y-flip).
-			float ppm = 0.5 * size.y / (abs(inv_proj[1][1]) * -v.z);
-			float r_px = min(bump_size * bump_profile(w) * ppm, max_grow_px);
-			return lo < r_px ? q : uv;
+		if (best >= 1e6) {
+			continue;
 		}
+		// Colour/depth source: a few pixels inside the leaf (right at the silhouette
+		// the surface is grazing and flickers), along the mean hit direction (the
+		// single closest direction jumps between neighbours and smears cel bands).
+		vec2 q = uv + best_dir * (best_hi + SAMPLE_INSET_PX) * px;
+		if (dot(dir_sum, dir_sum) > 0.25) {
+			vec2 qa = uv + normalize(dir_sum) * (best_hi + SAMPLE_INSET_PX) * px;
+			if (is_leaf(nr_tex, qa)) {
+				q = qa;
+			}
+		}
+		float qd = texture(depth_tex, q).r;
+		// Reverse-Z: bigger is nearer. Only grow over farther surfaces.
+		if (qd <= pd) {
+			return uv;
+		}
+		vec4 v = inv_proj * vec4(q * 2.0 - 1.0, qd, 1.0);
+		// Pixels per metre at this distance; |inv_proj[1][1]| is tan(fov_y / 2) (its
+		// sign depends on the projection's y-flip).
+		float ppm = 0.5 * size.y / (abs(inv_proj[1][1]) * (-v.z / v.w));
+		float profile = clamp((leaf_w(nr_tex, uv + best_dir * best_hi * px) - 0.25) / 0.5, 0.0, 1.0);
+		float r_px = min(bump_size * profile * ppm, max_grow_px);
+		return best < r_px ? q : uv;
 	}
 	return uv;
 }
