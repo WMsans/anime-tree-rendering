@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dnslfx8lkvoge"]
 
-[ext_resource type="Script" uid="uid://s42q0m03c4d7" path="res://src/free_camera.gd" id="1_aulnb"]
-[ext_resource type="Script" uid="uid://cet6jjfpmyl20" path="res://src/outline_post_process.gd" id="1_post"]
+[ext_resource type="Script" uid="uid://s42q0m03c4d7" path="res://demo/src/free_camera.gd" id="1_aulnb"]
+[ext_resource type="Script" uid="uid://cet6jjfpmyl20" path="res://demo/src/outline_post_process.gd" id="1_post"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lu01f"]
 sky_top_color = Color(0.23520002, 0.4834668, 0.98, 1)
