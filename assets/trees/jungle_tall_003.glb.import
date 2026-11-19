@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b8ix35no8457k"
+uid="uid://d8d305uk76r6"
 path="res://.godot/imported/jungle_tall_003.glb-e542c35bf08d0de2113cef7ccb8a1581.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/anime_trees/import/tree_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

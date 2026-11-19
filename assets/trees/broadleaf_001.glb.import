@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dy8clywrxp0mh"
+uid="uid://bkyao6tvjw2mg"
 path="res://.godot/imported/broadleaf_001.glb-9fc219dea4d9155f1570f186f2c3bcfa.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/anime_trees/import/tree_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

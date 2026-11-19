@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cq47vfoivwte3"
+uid="uid://2k5xrc2jrcf3"
 path="res://.godot/imported/leaning_001.glb-71902554b8977038433ce2a9e5cce76c.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/anime_trees/import/tree_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://r58c1p115ti2"
+uid="uid://iliaoj4j3hki"
 path="res://.godot/imported/banyan_002.glb-7d88c5791190021f9ba9d45146098dc4.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/anime_trees/import/tree_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
