@@ -5,8 +5,9 @@
 // leaf.gdshader writes ROUGHNESS = 0.25 + 0.5 * profile: 0.25..0.75 marks a leaf
 // pixel, profile (0..1) is the bump height there, a row of semicircles of radius
 // leaf_bump_px along each clump's edge. Other surfaces are 1.0, sky 0.
-// LeafSeedEffect (jump flood) provides leaf_seed: the nearest leaf pixel's
-// coordinates for every pixel, so the edge distance is exact and smooth.
+// LeafSeedEffect (jump flood) provides leaf_seed: for every pixel, the nearest
+// leaf pixel in front of it by more than its depth_gap, so the edge distance is
+// exact and smooth, and a leaf scallops over farther leaves as well as the sky.
 
 // Bump radius in screen pixels (project setting shader_globals/leaf_bump_px).
 // Must stay below LeafSeedEffect's 31 px reach.
@@ -27,11 +28,9 @@ bool is_leaf(sampler2D nr_tex, vec2 uv) {
 }
 
 // The uv whose colour and depth this pixel should show: itself, or the nearest
-// leaf pixel when this pixel lies under that edge point's bump.
+// leaf pixel in front of it when this pixel lies under that edge point's bump.
+// Leaf pixels too: a farther leaf gets covered by a nearer leaf's scallops.
 vec2 leaf_source(vec2 uv, sampler2D depth_tex, sampler2D nr_tex) {
-	if (is_leaf(nr_tex, uv)) {
-		return uv;
-	}
 	vec2 size = vec2(textureSize(depth_tex, 0));
 	ivec2 c = ivec2(uv * size);
 	// texelFetch: globals can't take a filter hint, and coordinates mustn't blend.

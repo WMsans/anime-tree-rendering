@@ -45,11 +45,6 @@ float hue_step(vec3 cc, float c, vec2 uv, float n) {
 	return n > c ? distance(cc, chroma(uv)) : 0.0;
 }
 
-// Tap that is neither a leaf nor grown, behind the centre: the grown edge.
-bool leaf_gap(float c, vec2 tap, float z) {
-	return !is_leaf(normal_roughness_texture, tap) && z > c;
-}
-
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
 }
@@ -83,13 +78,14 @@ void fragment() {
 			max(hue_step(cc, c, u, zu), hue_step(cc, c, dn, zd)));
 	edge = max(edge, smoothstep(color_threshold, color_threshold * 2.0, hue));
 
-	// Grown leaf pixels borrow depth from slightly different leaf points, so the
-	// depth test above fires at random inside the grown band. Where any tap is
-	// grown, draw only where leaf area meets a farther non-leaf surface instead.
+	// Grown leaf pixels borrow depth from slightly different leaf points, which the
+	// second derivative above amplifies into noise inside the grown band. Where any
+	// tap is grown, use a plain step instead: line on the nearer side wherever a
+	// tap is farther by more than the threshold (sky, ground, a farther leaf), so
+	// the line follows the scallops and not the mesh edge underneath.
 	if (m != SCREEN_UV || l != tl || r != tr || u != tu || dn != td) {
-		edge = is_leaf(normal_roughness_texture, m)
-				&& (leaf_gap(c, l, zl) || leaf_gap(c, r, zr)
-				|| leaf_gap(c, u, zu) || leaf_gap(c, dn, zd)) ? 1.0 : 0.0;
+		float gap = max(max(zl, zr), max(zu, zd)) - c;
+		edge = smoothstep(depth_threshold, depth_threshold * 2.0, gap);
 	}
 
 	ALBEDO = outline_color.rgb;

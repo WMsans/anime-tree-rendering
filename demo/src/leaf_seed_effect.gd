@@ -1,4 +1,5 @@
-## Jump-flood pass: for every pixel, the nearest leaf pixel within 31 px.
+## Jump-flood pass: for every pixel, the nearest leaf pixel within 31 px that is
+## in front of it by more than [member depth_gap].
 ##
 ## Runs after the opaque pass and publishes the result as the global shader
 ## uniform [code]leaf_seed[/code] (RG = pixel coordinates), which
@@ -14,6 +15,11 @@ extends CompositorEffect
 ## Jump sizes, JFA+1. Reach is their sum (31 px), so leaf_bump_px must stay below
 ## it. An even count leaves the result in _tex[0].
 const STEPS: Array[int] = [16, 8, 4, 2, 1, 1]
+
+## Leaves grow their scallops only over surfaces at least this many metres behind
+## them, so lobes of one clump don't scallop over each other. Keep it equal to
+## OutlinePostProcess.depth_threshold so every scalloped edge gets its line.
+@export var depth_gap := 2.0
 
 var _rd: RenderingDevice
 var _shader: RID
@@ -69,13 +75,19 @@ func _render_callback(type: int, render_data: RenderData) -> void:
 	if size != _size:
 		_make_textures(size)
 	var nr := buffers.get_texture(&"forward_clustered", &"normal_roughness")
+	var depth := buffers.get_depth_texture()
+	var proj := render_data.get_render_scene_data().get_cam_projection()
+	# This is the reverse-Z projection the depth buffer was written with: depth
+	# d = (Z.z * zv + W.z) / -zv, so view distance = W.z / (d + Z.z).
+	var floats := PackedFloat32Array([proj.w.z, proj.z.z, depth_gap, 0.0]).to_byte_array()
 	var groups := Vector3i(ceili(size.x / 8.0), ceili(size.y / 8.0), 1)
 	for i in STEPS.size() + 1:
-		var pc := PackedInt32Array([size.x, size.y, 0 if i == 0 else STEPS[i - 1], 0]).to_byte_array()
+		var pc := PackedInt32Array([size.x, size.y, 0 if i == 0 else STEPS[i - 1], 0]).to_byte_array() + floats
 		var uniform_set := UniformSetCacheRD.get_cache(_shader, 0, [
 			_uniform(RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE, 0, [_sampler, nr]),
 			_uniform(RenderingDevice.UNIFORM_TYPE_IMAGE, 1, [_tex[(i + 1) % 2]]),
 			_uniform(RenderingDevice.UNIFORM_TYPE_IMAGE, 2, [_tex[i % 2]]),
+			_uniform(RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE, 3, [_sampler, depth]),
 		])
 		var list := _rd.compute_list_begin()
 		_rd.compute_list_bind_compute_pipeline(list, _pipeline)
@@ -90,7 +102,7 @@ func _make_textures(size: Vector2i) -> void:
 		_rd.free_rid(rid)
 	_old = _tex
 	var fmt := RDTextureFormat.new()
-	fmt.format = RenderingDevice.DATA_FORMAT_R32G32_SFLOAT
+	fmt.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
 	fmt.width = size.x
 	fmt.height = size.y
 	fmt.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT
