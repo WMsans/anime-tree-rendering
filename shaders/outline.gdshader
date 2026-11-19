@@ -15,6 +15,9 @@ uniform float color_threshold = 0.08;
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 // Opaque-only copy, before cel shading. Cel shading keeps hue, so this is fine.
 uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
+uniform sampler2D normal_roughness_texture : hint_normal_roughness_texture, filter_nearest;
+
+#include "res://shaders/leaf_scallop.gdshaderinc"
 
 // View-space distance of the opaque surface at uv. Godot 4 uses a reverse-Z buffer,
 // so depth 0 is the far plane: sky, or nothing drawn there. inv_proj has to be
@@ -42,17 +45,30 @@ float hue_step(vec3 cc, float c, vec2 uv, float n) {
 	return n > c ? distance(cc, chroma(uv)) : 0.0;
 }
 
+// Tap that is neither a leaf nor grown, behind the centre: the grown edge.
+bool leaf_gap(float c, vec2 tap, float z) {
+	return !is_leaf(normal_roughness_texture, tap) && z > c;
+}
+
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
 }
 
 void fragment() {
 	vec2 o = thickness / vec2(textureSize(depth_texture, 0));
-	vec2 l = SCREEN_UV - vec2(o.x, 0.0);
-	vec2 r = SCREEN_UV + vec2(o.x, 0.0);
-	vec2 u = SCREEN_UV - vec2(0.0, o.y);
-	vec2 dn = SCREEN_UV + vec2(0.0, o.y);
-	float c = view_depth(SCREEN_UV, INV_PROJECTION_MATRIX);
+	// Every tap goes through leaf_source, so lines follow the grown leaf edges.
+	mat4 ip = INV_PROJECTION_MATRIX;
+	mat4 iv = INV_VIEW_MATRIX;
+	vec2 tl = SCREEN_UV - vec2(o.x, 0.0);
+	vec2 tr = SCREEN_UV + vec2(o.x, 0.0);
+	vec2 tu = SCREEN_UV - vec2(0.0, o.y);
+	vec2 td = SCREEN_UV + vec2(0.0, o.y);
+	vec2 m = leaf_source(SCREEN_UV, depth_texture, normal_roughness_texture, ip, iv);
+	vec2 l = leaf_source(tl, depth_texture, normal_roughness_texture, ip, iv);
+	vec2 r = leaf_source(tr, depth_texture, normal_roughness_texture, ip, iv);
+	vec2 u = leaf_source(tu, depth_texture, normal_roughness_texture, ip, iv);
+	vec2 dn = leaf_source(td, depth_texture, normal_roughness_texture, ip, iv);
+	float c = view_depth(m, INV_PROJECTION_MATRIX);
 	float zl = view_depth(l, INV_PROJECTION_MATRIX);
 	float zr = view_depth(r, INV_PROJECTION_MATRIX);
 	float zu = view_depth(u, INV_PROJECTION_MATRIX);
@@ -64,10 +80,19 @@ void fragment() {
 	float lap = abs(zl + zr - 2.0 * c) + abs(zu + zd - 2.0 * c);
 	float edge = smoothstep(depth_threshold, depth_threshold * 2.0, lap);
 
-	vec3 cc = chroma(SCREEN_UV);
+	vec3 cc = chroma(m);
 	float hue = max(max(hue_step(cc, c, l, zl), hue_step(cc, c, r, zr)),
 			max(hue_step(cc, c, u, zu), hue_step(cc, c, dn, zd)));
 	edge = max(edge, smoothstep(color_threshold, color_threshold * 2.0, hue));
+
+	// Grown leaf pixels borrow depth from slightly different leaf points, so the
+	// depth test above fires at random inside the grown band. Where any tap is
+	// grown, draw only where leaf area meets a farther non-leaf surface instead.
+	if (m != SCREEN_UV || l != tl || r != tr || u != tu || dn != td) {
+		edge = is_leaf(normal_roughness_texture, m)
+				&& (leaf_gap(c, l, zl) || leaf_gap(c, r, zr)
+				|| leaf_gap(c, u, zu) || leaf_gap(c, dn, zd)) ? 1.0 : 0.0;
+	}
 
 	ALBEDO = outline_color.rgb;
 	ALPHA = edge * outline_color.a;

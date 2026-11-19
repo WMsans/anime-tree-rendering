@@ -66,3 +66,20 @@ Picked A: shortest path to the look, fits the existing post-process pipeline.
 - Exact scallop function and default uniform values (tune by eye against refs 1, 2).
 - Whether the projected-centre angle needs a fallback when the camera is inside a
   clump (it can just do nothing there).
+
+## Revision (2026-11-19): screen-space grow replaces the silhouette cut
+Approach A failed on the real meshes: leaf clumps are ~86-tri lumpy blobs with
+normals radial from an off-origin centre, so no smooth "near the silhouette" value
+exists and the cut gave radial spikes. Decided with the user:
+- **Grow, not shrink, in screen space.** A post pass lets a non-leaf pixel take a
+  nearby leaf pixel's colour and depth when it falls inside a round bump at that
+  leaf's edge (shrinking can't work: what's behind a leaf is gone).
+- **Leaf mask:** leaf shader writes `ROUGHNESS = 0.5` (no visual effect: Lambert,
+  specular off); post passes read it from the normal/roughness buffer.
+- **Bumps anchored to world position** of the leaf pixel (from depth), sized in
+  metres, so they don't crawl and shrink with distance like the refs.
+- **Grow only over farther surfaces** (sky, ground, trunk behind, farther clumps);
+  a nearer trunk stays on top.
+- Cel shading and outline both resolve each pixel through the same remap
+  (shared `.gdshaderinc`), so grown pixels get cel bands and the depth outline
+  traces the wavy edge.

@@ -10,6 +10,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var prefix: String = OS.get_cmdline_user_args()[0]
 	var scene: Node = load("res://demo/tree_demo.tscn").instantiate()
+	# Drop the fly-camera script: stray mouse input at startup would turn the view.
+	scene.get_node("Camera3D").set_script(null)
 	root.add_child(scene)
 	for i in 2:
 		for f in 10:

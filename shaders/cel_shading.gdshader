@@ -16,14 +16,19 @@ render_mode unshaded, cull_disabled, depth_test_disabled, depth_draw_never, fog_
 uniform sampler2D ramp : source_color, filter_nearest, repeat_disable;
 uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
+uniform sampler2D normal_roughness_texture : hint_normal_roughness_texture, filter_nearest;
+
+#include "res://shaders/leaf_scallop.gdshaderinc"
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
 }
 
 void fragment() {
-	vec3 col = texture(screen_texture, SCREEN_UV).rgb;
-	float d = texture(depth_texture, SCREEN_UV).r;
+	vec2 uv = leaf_source(SCREEN_UV, depth_texture, normal_roughness_texture,
+			INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+	vec3 col = texture(screen_texture, uv).rgb;
+	float d = texture(depth_texture, uv).r;
 	// Reverse-Z: 0 is the far plane, i.e. sky. Leave it smooth.
 	if (d > 0.0) {
 		float lum = max(dot(col, vec3(0.2126, 0.7152, 0.0722)), 1e-4);
