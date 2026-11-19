@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cm5hy2o8x1ycd"
+path="res://.godot/imported/leaf_seed.glsl-5c6bac2c6e4f808c2a7d5be419800b18.res"
+
+[deps]
+
+source_file="res://shaders/leaf_seed.glsl"
+dest_files=["res://.godot/imported/leaf_seed.glsl-5c6bac2c6e4f808c2a7d5be419800b18.res"]
+
+[params]
+

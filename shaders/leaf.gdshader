@@ -5,10 +5,17 @@ shader_type spatial;
 render_mode diffuse_lambert, specular_disabled, cull_back;
 
 uniform vec4 albedo : source_color = vec4(1.0);
-// Distance between bump centres along a clump's edge, metres.
-uniform float bump_spacing = 0.8;
-// Rough mesh-space radius of a clump, to turn angle into arc length.
+// Rough mesh-space radius of a clump, to turn angle into on-screen arc length.
 uniform float clump_radius = 4.0;
+// Bump radius in screen pixels, shared with leaf_scallop.gdshaderinc.
+global uniform float leaf_bump_px;
+
+// Row of n semicircles around the turn, cusps between: the scallop pass grows the
+// edge by this height, so the grown edge is a row of round scallops.
+float semicircles(float a, float n) {
+	float u = fract(a * n / TAU) * 2.0 - 1.0;
+	return sqrt(1.0 - u * u);
+}
 
 void fragment() {
 	ALBEDO = albedo.rgb;
@@ -23,12 +30,15 @@ void fragment() {
 		vec2 d = VERTEX.xy / -VERTEX.z - c.xy / -c.z;
 		float phase = fract(sin(dot(NODE_POSITION_WORLD, vec3(12.9898, 78.233, 37.719))) * 43758.5453) * TAU;
 		float a = atan(d.y, d.x) + phase;
-		// Whole number of bumps per turn, so there's no seam where atan wraps.
-		float n = max(3.0, round(TAU * clump_radius * length(MODEL_MATRIX[0].xyz) / bump_spacing));
-		// Semicircle per bump, cusps between: the scallop pass grows the edge by this
-		// height, so the grown edge is a row of round scallops.
-		float u = fract(a * n / TAU) * 2.0 - 1.0;
-		profile = sqrt(1.0 - u * u);
+		// Bumps are leaf_bump_px in radius on screen whatever the distance: the
+		// clump's on-screen circumference sets the bump count. Blend the two nearest
+		// whole counts (whole: no seam where atan wraps) so bumps morph instead of
+		// popping as the camera dollies.
+		float ppm = 0.5 * VIEWPORT_SIZE.y * abs(PROJECTION_MATRIX[1][1]) / -c.z;
+		float r_px = clump_radius * length(MODEL_MATRIX[0].xyz) * ppm;
+		float n = max(3.0, TAU * r_px / (2.0 * leaf_bump_px));
+		float n0 = floor(n);
+		profile = mix(semicircles(a, n0), semicircles(a, n0 + 1.0), n - n0);
 	}
 	ROUGHNESS = 0.25 + 0.5 * profile;
 }

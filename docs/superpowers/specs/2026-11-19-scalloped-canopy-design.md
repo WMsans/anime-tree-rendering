@@ -83,3 +83,15 @@ exists and the cut gave radial spikes. Decided with the user:
 - Cel shading and outline both resolve each pixel through the same remap
   (shared `.gdshaderinc`), so grown pixels get cel bands and the depth outline
   traces the wavy edge.
+
+## Revision 2 (2026-11-19): constant screen-size bumps, jump flood
+User feedback: bumps crawled with the camera, too fine far away, too big/hairy up
+close. Decided:
+- **Bump size is constant in screen pixels** (`shader_globals/leaf_bump_px`).
+- **Profile per clump:** leaf.gdshader computes a row of semicircles by on-screen
+  angle around the clump origin (count from the clump's on-screen size, blended
+  between whole counts so it morphs, not pops) and packs it into ROUGHNESS
+  0.25..0.75. Bumps stay put under camera moves.
+- **Jump flood** (`LeafSeedEffect`, CompositorEffect after opaque) gives each
+  pixel its exact nearest leaf pixel via global `leaf_seed`; the shared include
+  grows a pixel when it's within the bump height at that point.
