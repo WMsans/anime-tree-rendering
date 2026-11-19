@@ -24,6 +24,9 @@ varying float v_blotch;
 void vertex() {
 	v_obj = VERTEX;
 	v_moss_attr = COLOR.r;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
+		VERTEX = vec3(0.0);
+	}
 }
 
 vec3 trunk_color(int band, float moss, float line) {

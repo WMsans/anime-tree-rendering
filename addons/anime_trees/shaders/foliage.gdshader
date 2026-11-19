@@ -44,6 +44,9 @@ void vertex() {
 	float cell = UV2.x;
 	v_atlas_uv = (UV + vec2(mod(cell, 2.0), floor(cell / 2.0))) * 0.5;
 	VERTEX = view_pos;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
+		VERTEX = vec3(0.0);
+	}
 	NORMAL = vec3(0.0, 0.0, 1.0);
 }
 

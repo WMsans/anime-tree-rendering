@@ -72,3 +72,14 @@ bool lod_discard(vec3 origin, vec3 cam, vec2 frag, bool ortho) {
 	float t = bayer4(frag);
 	return fin < 1.0 - t || fout <= t;
 }
+
+// Whole-instance cull for MultiMesh cells (cell ranges are widened by the cell radius).
+// Callers collapse VERTEX to a point -> degenerate triangles, nothing rasterized.
+bool lod_out_of_range(vec3 origin, vec3 cam, bool ortho) {
+	float m = lod_range.z;
+	if (ortho || m <= 0.0) {
+		return false;
+	}
+	float d = distance(origin, cam);
+	return d > lod_range.y + m || (lod_range.x > 0.0 && d < lod_range.x - m);
+}

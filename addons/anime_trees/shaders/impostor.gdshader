@@ -72,6 +72,9 @@ void vertex() {
 	v_uv01 = vec4(frame_local_uv(fr[0], cam_obj, p_obj), frame_local_uv(fr[1], cam_obj, p_obj));
 	v_uv23 = vec4(frame_local_uv(fr[2], cam_obj, p_obj), frame_local_uv(fr[3], cam_obj, p_obj));
 	VERTEX = view_pos;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
+		VERTEX = vec3(0.0);
+	}
 	NORMAL = vec3(0.0, 0.0, 1.0);
 }
 
