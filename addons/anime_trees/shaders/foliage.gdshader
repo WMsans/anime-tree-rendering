@@ -71,6 +71,7 @@ void fragment() {
 	vec3 hit_view = (mv * vec4(hit, 1.0)).xyz;
 	vec4 clip = PROJECTION_MATRIX * vec4(hit_view, 1.0);
 	DEPTH = clip.z / clip.w;
+	LIGHT_VERTEX = hit_view; // shadows/lights sample at the ellipsoid surface, not the card
 	NORMAL = normalize(mat3(mv) * n_obj);
 	ROUGHNESS = 0.5;
 

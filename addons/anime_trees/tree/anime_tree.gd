@@ -12,12 +12,23 @@ extends Node3D
 	set(v): impostor_end = v; apply_lod()
 @export var fade_margin := 8.0:
 	set(v): fade_margin = v; apply_lod()
-@export var impostor_set: Resource  ## ImpostorSet (Task 7)
+@export var impostor_set: ImpostorSet:
+	set(v): impostor_set = v; _apply_impostor()
 @export var variant_id := ""
 
 
 func _ready() -> void:
 	apply_lod()
+	_apply_impostor()
+
+
+func _apply_impostor() -> void:
+	var imp := get_node_or_null("Impostor") as MeshInstance3D
+	if imp == null:
+		return
+	var mat: Material = impostor_set.entries.get(variant_id) if impostor_set else null
+	imp.material_override = mat
+	imp.visible = mat != null
 
 
 ## Visibility ranges overlap by fade_margin; inside the overlap the shaders dither-crossfade
