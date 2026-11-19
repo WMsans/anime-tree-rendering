@@ -13,8 +13,6 @@ uniform vec3 mid_color : source_color = vec3(0.247, 0.518, 0.141);
 uniform vec3 dark_color : source_color = vec3(0.173, 0.416, 0.118);
 uniform float blotch_scale = 0.9;
 uniform float blotch_threshold = 0.66;
-uniform float near_fade_start = 1.5;
-uniform float near_fade_end = 0.5;
 uniform float alpha_cut = 0.5;
 
 varying vec3 v_obj;       // point on the (bent) card, object space; lies on the pixel ray
@@ -50,8 +48,6 @@ void vertex() {
 	} else {
 	vec3 center_view = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float half_size = CUSTOM1.w;
-	float d = length(center_view);
-	half_size *= smoothstep(near_fade_end, near_fade_start, d);
 	float a = UV2.y * TAU;
 	vec2 corner = (UV * 2.0 - 1.0);
 	corner = mat2(vec2(cos(a), sin(a)), vec2(-sin(a), cos(a))) * corner;
