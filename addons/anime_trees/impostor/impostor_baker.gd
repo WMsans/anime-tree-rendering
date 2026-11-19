@@ -16,6 +16,9 @@ const SETTLE_FRAMES := 3
 @export var frame_px := 128
 @export_tool_button("Bake impostors", "Bake") var bake_button := _bake_from_editor
 
+## Last value written to the anime_tree_bake_mode global (the getter is editor-only).
+static var bake_mode := 0
+var _busy := false
 var _vps: Array[SubViewport] = []
 var _cams: Array[Camera3D] = []
 var _holder: Node3D
@@ -36,26 +39,63 @@ func _out_dir() -> String:
 	return d if d.ends_with("/") else d + "/"
 
 
+## Re-bakes update the existing set / materials / textures in place, so scenes holding them
+## keep valid references (and never embed orphaned copies on save).
 func bake() -> ImpostorSet:
+	if _busy:
+		push_warning("ImpostorBaker: a bake is already running")
+		return null
+	_busy = true
 	var dir := _out_dir()
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
-	var set := ImpostorSet.new()
+	var set_path := dir + "impostor_set.tres"
+	var set: ImpostorSet = load(set_path) if ResourceLoader.exists(set_path) else null
+	if set == null:
+		set = ImpostorSet.new()
+	var baked := {}
 	_make_rig()
 	for ps in variants:
-		var tree := ps.instantiate() as AnimeTree
-		if tree == null:
-			push_warning("ImpostorBaker: %s is not an AnimeTree scene" % ps.resource_path)
+		var tree := ps.instantiate() if ps else null
+		if not _is_bakeable(tree):
+			push_warning("ImpostorBaker: skipping %s (not an imported AnimeTree)" % (ps.resource_path if ps else "null"))
+			if tree:
+				tree.free()
 			continue
-		var id := tree.variant_id  # read before the await: _bake_variant frees the tree
-		set.entries[id] = await _bake_variant(tree, dir)
+		var id: String = tree.variant_id  # read before the await: _bake_variant frees the tree
+		set.entries[id] = await _bake_variant(tree, dir, set.entries.get(id))
+		baked[id] = true
+	for id in set.entries.keys():
+		if not baked.has(id):
+			set.entries.erase(id)
 	_free_rig()
-	RenderingServer.global_shader_parameter_set("anime_tree_bake_mode", 0)
-	ResourceSaver.save(set, dir + "impostor_set.tres")
-	set.take_over_path(dir + "impostor_set.tres")
+	_set_mode(0)
+	ResourceSaver.save(set, set_path)
+	if set.resource_path != set_path:
+		set.take_over_path(set_path)
+	_busy = false
 	return set
 
 
+static func _set_mode(m: int) -> void:
+	bake_mode = m
+	RenderingServer.global_shader_parameter_set("anime_tree_bake_mode", m)
+
+
+func _is_bakeable(tree: Node) -> bool:
+	if not tree is AnimeTree:
+		return false
+	var lod0 := tree.get_node_or_null("LOD0") as MeshInstance3D
+	return lod0 != null and lod0.mesh != null and tree.get_node_or_null("LOD1") != null \
+		and tree.get_node_or_null("Impostor") != null
+
+
+func _exit_tree() -> void:
+	if _busy:  # freed / scene closed mid-bake: don't leave every tree rendering a bake pass
+		_set_mode(0)
+
+
 func _make_rig() -> void:
+	_free_rig()
 	var world := World3D.new()
 	var env := Environment.new()
 	env.background_mode = Environment.BG_CLEAR_COLOR
@@ -91,12 +131,13 @@ func _make_rig() -> void:
 
 func _free_rig() -> void:
 	for vp in _vps:
+		remove_child(vp)
 		vp.queue_free()
 	_vps.clear()
 	_cams.clear()
 
 
-func _bake_variant(tree: AnimeTree, dir: String) -> ShaderMaterial:
+func _bake_variant(tree: AnimeTree, dir: String, existing: ShaderMaterial) -> ShaderMaterial:
 	var id := tree.variant_id
 	_holder.add_child(tree)
 	tree.get_node("LOD1").visible = false
@@ -147,7 +188,7 @@ func _bake_variant(tree: AnimeTree, dir: String) -> ShaderMaterial:
 	albedo.generate_mipmaps()
 	var alb_tex := _save_tex(albedo, dir + id + "_albedo.res")
 	var nd_tex := _save_tex(_point_mipmaps(ndsh), dir + id + "_ndsh.res")
-	var mat := ShaderMaterial.new()
+	var mat := existing if existing else ShaderMaterial.new()
 	mat.shader = IMPOSTOR_SHADER
 	mat.set_shader_parameter("albedo_atlas", alb_tex)
 	mat.set_shader_parameter("ndsh_atlas", nd_tex)
@@ -161,7 +202,7 @@ func _bake_variant(tree: AnimeTree, dir: String) -> ShaderMaterial:
 
 ## Renders all frames in one bake mode. Returns RGBA8 images (albedo pass sRGB-encoded).
 func _pass(mode: int, outline: bool) -> Array[Image]:
-	RenderingServer.global_shader_parameter_set("anime_tree_bake_mode", mode)
+	_set_mode(mode)
 	for cam in _cams:
 		cam.compositor = _compositor if outline else null
 	for f in SETTLE_FRAMES:
@@ -207,12 +248,18 @@ func _point_mipmaps(img: Image) -> Image:
 	return Image.create_from_data(img.get_width(), img.get_height(), true, Image.FORMAT_RGBA8, data)
 
 
+## Reuses the texture already loaded from `path` (scenes may hold it) and overwrites its data.
 func _save_tex(img: Image, path: String) -> Texture2D:
-	var tex := PortableCompressedTexture2D.new()
+	var tex: PortableCompressedTexture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as PortableCompressedTexture2D
+	if tex == null:
+		tex = PortableCompressedTexture2D.new()
 	tex.keep_compressed_buffer = true  # outside the editor the buffer is dropped and can't be saved
 	tex.create_from_image(img, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS)
 	ResourceSaver.save(tex, path)
-	tex.take_over_path(path)
+	if tex.resource_path != path:
+		tex.take_over_path(path)
 	return tex
 
 

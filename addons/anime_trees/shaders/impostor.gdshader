@@ -81,6 +81,10 @@ void vertex() {
 }
 
 void fragment() {
+	// Mip level from the continuous frame-local uv: the per-pixel frame choice below makes the
+	// atlas uv jump between frames, which would make implicit derivatives pick a tiny mip.
+	vec2 grad_x = dFdx(v_uv01.xy) / float(FRAMES);
+	vec2 grad_y = dFdy(v_uv01.xy) / float(FRAMES);
 	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
 		discard;
 	}
@@ -95,11 +99,11 @@ void fragment() {
 	}
 	vec2 frame = vec2(mod(fi, float(FRAMES)), floor(fi / float(FRAMES)));
 	vec2 auv = (frame + luv) / float(FRAMES);
-	vec4 al = texture(albedo_atlas, auv);
+	vec4 al = textureGrad(albedo_atlas, auv, grad_x, grad_y);
 	if (al.a < alpha_cut) {
 		discard;
 	}
-	vec4 nd = texture(ndsh_atlas, auv);
+	vec4 nd = textureGrad(ndsh_atlas, auv, grad_x, grad_y);
 	v_ink = al.a < 0.75 ? 1.0 : 0.0;
 	v_bits = nd.a * 255.0;
 	mat4 mv = VIEW_MATRIX * MODEL_MATRIX;

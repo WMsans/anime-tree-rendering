@@ -10,8 +10,9 @@ extends Node3D
 	set(v): lod1_end = v; apply_lod()
 @export var impostor_end := 2000.0:
 	set(v): impostor_end = v; apply_lod()
+## Crossfade band (m). Clamped > 0: a zero lod_range margin means "no LOD logic" in the shaders.
 @export var fade_margin := 4.0:
-	set(v): fade_margin = v; apply_lod()
+	set(v): fade_margin = maxf(v, 0.01); apply_lod()
 @export var impostor_set: ImpostorSet:
 	set(v): impostor_set = v; _apply_impostor()
 @export var variant_id := ""

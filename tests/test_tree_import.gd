@@ -87,3 +87,12 @@ func _surface_aabb(mesh: ArrayMesh, s: int) -> AABB:
 	for p in v:
 		a = a.expand(p)
 	return a
+
+
+func test_zero_fade_margin_keeps_lod_logic() -> void:
+	# lod_range.z <= 0 means "no LOD logic" in the shaders; a zero margin must still hard-switch.
+	tree = _load("broadleaf_001")
+	tree.fade_margin = 0.0
+	var lr: Vector3 = tree.get_node("LOD0").get_instance_shader_parameter("lod_range")
+	check(lr.z > 0.0, "fade_margin 0 disabled LOD culling: %s" % lr)
+	tree.free()
