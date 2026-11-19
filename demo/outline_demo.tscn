@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://dnslfx8lkvoge"]
+
+[ext_resource type="Script" uid="uid://s42q0m03c4d7" path="res://demo/src/free_camera.gd" id="1_aulnb"]
+[ext_resource type="Script" uid="uid://cet6jjfpmyl20" path="res://demo/src/outline_post_process.gd" id="1_post"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lu01f"]
+sky_top_color = Color(0.23520002, 0.4834668, 0.98, 1)
+sky_horizon_color = Color(0.54940003, 0.59563, 0.67, 1)
+ground_bottom_color = Color(0.23779999, 0.25781, 0.29, 1)
+ground_horizon_color = Color(0.54901963, 0.59607846, 0.67058825, 1)
+
+[sub_resource type="Sky" id="Sky_hj6h6"]
+sky_material = SubResource("ProceduralSkyMaterial_lu01f")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("Sky_hj6h6")
+
+[sub_resource type="StandardMaterial3D" id="mat_front"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.55, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="box"]
+size = Vector3(2, 2, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="mat_back"]
+shading_mode = 0
+albedo_color = Color(0.15, 0.7, 0.75, 1)
+
+[node name="OutlineDemo" type="Node3D" unique_id=1469389801]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=474261028]
+environment = SubResource("env")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=150532418]
+current = true
+script = ExtResource("1_aulnb")
+
+[node name="OutlinePostProcess" type="Node3D" parent="." unique_id=1546148126]
+script = ExtResource("1_post")
+depth_threshold = 2.0
+
+[node name="Near_Front" type="MeshInstance3D" parent="." unique_id=383869512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, -0.7, -6)
+material_override = SubResource("mat_front")
+mesh = SubResource("box")
+
+[node name="Near_Back" type="MeshInstance3D" parent="." unique_id=1899538607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.7, -6.2)
+material_override = SubResource("mat_back")
+mesh = SubResource("box")
+
+[node name="Mid_Front" type="MeshInstance3D" parent="." unique_id=1597785954]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, -6)
+material_override = SubResource("mat_front")
+mesh = SubResource("box")
+
+[node name="Mid_Back" type="MeshInstance3D" parent="." unique_id=507889395]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -8)
+material_override = SubResource("mat_back")
+mesh = SubResource("box")
+
+[node name="Far_Front" type="MeshInstance3D" parent="." unique_id=614489002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, -0.7, -6)
+material_override = SubResource("mat_front")
+mesh = SubResource("box")
+
+[node name="Far_Back" type="MeshInstance3D" parent="." unique_id=1980556052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.7, -10)
+material_override = SubResource("mat_back")
+mesh = SubResource("box")
