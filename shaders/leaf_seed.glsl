@@ -24,7 +24,11 @@ void main() {
 		return;
 	}
 	if (p.step == 0) {
-		bool leaf = abs(texelFetch(nr_tex, c, 0).w - 0.5) < 0.26;
+		// Raw buffer: Godot stores roughness * 127/255, mirrored (1 - w) for dynamic
+		// instances. Spatial shaders get this decoded for them; compute doesn't.
+		float w = texelFetch(nr_tex, c, 0).w;
+		float r = (w > 0.5 ? 1.0 - w : w) / (127.0 / 255.0);
+		bool leaf = abs(r - 0.5) < 0.26;
 		imageStore(dst, c, vec4(leaf ? vec2(c) : NONE, 0.0, 0.0));
 		return;
 	}

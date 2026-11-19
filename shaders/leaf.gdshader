@@ -36,7 +36,9 @@ void fragment() {
 		// popping as the camera dollies.
 		float ppm = 0.5 * VIEWPORT_SIZE.y * abs(PROJECTION_MATRIX[1][1]) / -c.z;
 		float r_px = clump_radius * length(MODEL_MATRIX[0].xyz) * ppm;
-		float n = max(3.0, TAU * r_px / (2.0 * leaf_bump_px));
+		// Capped: with the camera right at the clump origin ppm blows up and
+		// thousands of bumps would read as noise.
+		float n = clamp(TAU * r_px / (2.0 * leaf_bump_px), 3.0, 64.0);
 		float n0 = floor(n);
 		profile = mix(semicircles(a, n0), semicircles(a, n0 + 1.0), n - n0);
 	}

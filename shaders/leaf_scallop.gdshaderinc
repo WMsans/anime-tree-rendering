@@ -18,7 +18,7 @@ global uniform sampler2D leaf_seed;
 const float SAMPLE_INSET_PX = 3.0;
 
 float leaf_w(sampler2D nr_tex, vec2 uv) {
-	// w is the raw roughness (measured in Godot 4.7).
+	// Roughness; Godot decodes the buffer's packing for spatial shaders.
 	return texture(nr_tex, uv).w;
 }
 
@@ -38,11 +38,14 @@ vec2 leaf_source(vec2 uv, sampler2D depth_tex, sampler2D nr_tex) {
 	vec2 s = texelFetch(leaf_seed, c, 0).xy;
 	vec2 o = s - vec2(c);
 	float d = length(o);
-	// Also rejects "no leaf in reach" and an unbound leaf_seed (no LeafSeedEffect).
 	if (!(d < leaf_bump_px + 1.0)) {
 		return uv;
 	}
 	vec2 e = (s + 0.5) / size;
+	// No leaf in reach, or leaf_seed unbound (no LeafSeedEffect: default texture).
+	if (!is_leaf(nr_tex, e)) {
+		return uv;
+	}
 	float profile = clamp((leaf_w(nr_tex, e) - 0.25) / 0.5, 0.0, 1.0);
 	if (d >= leaf_bump_px * profile) {
 		return uv;

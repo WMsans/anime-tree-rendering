@@ -4,7 +4,10 @@
 ## uniform [code]leaf_seed[/code] (RG = pixel coordinates), which
 ## leaf_scallop.gdshaderinc reads to grow scalloped leaf edges. Add it to the
 ## Compositor of the WorldEnvironment or Camera3D.
-@tool
+##
+## Not a @tool: one instance serves every viewport it renders, and the editor's
+## differently sized viewports would make it free a texture still in use. So the
+## scallops show in the running game, not the editor viewport.
 class_name LeafSeedEffect
 extends CompositorEffect
 
@@ -39,7 +42,13 @@ func _init_rd() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE and _rd:
+	if what != NOTIFICATION_PREDELETE:
+		return
+	# Unpublish first so no material keeps sampling the textures freed below.
+	# ponytail: assumes one LeafSeedEffect at a time.
+	RenderingServer.global_shader_parameter_set(&"leaf_seed", null)
+	_seed.texture_rd_rid = RID()
+	if _rd:
 		for rid in _tex + _old:
 			_rd.free_rid(rid)
 		if _sampler.is_valid():
