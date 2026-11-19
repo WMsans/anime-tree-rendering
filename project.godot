@@ -32,3 +32,14 @@ rendering_device/driver.windows="d3d12"
 scene={
 "import_script/path": "res://addons/anime_trees/import/tree_post_import.gd"
 }
+
+[shader_globals]
+
+anime_tree_bake_mode={
+"type": "int",
+"value": 0
+}
+anime_tree_bake_depth_range={
+"type": "vec2",
+"value": Vector2(0, 1)
+}
