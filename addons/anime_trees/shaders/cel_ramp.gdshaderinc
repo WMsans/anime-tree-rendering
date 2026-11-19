@@ -50,6 +50,10 @@ float cel_noise(vec3 x) {
 	               mix(cel_hash(i + vec3(0, 1, 1)), cel_hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
 
+// LOD distances always use the MAIN camera (MAIN_CAM_INV_VIEW_MATRIX), also in shadow
+// passes, so far LOD0 trees don't render into the shadow cascades.
+varying vec3 v_main_cam;
+
 // Dithered LOD crossfade. lod_range = (begin, end, margin) set per node by AnimeTree/Forest.
 // A LOD keeps a pixel where fade_in >= 1 - t and fade_out > t, so two neighbouring LODs
 // partition the pixels exactly (no holes, no double coverage) inside the overlap.
@@ -61,9 +65,9 @@ float bayer4(vec2 frag) {
 	return (m[p.y * 4 + p.x] + 0.5) / 16.0;
 }
 
-bool lod_discard(vec3 origin, vec3 cam, vec2 frag, bool ortho) {
+bool lod_discard(vec3 origin, vec3 cam, vec2 frag) {
 	float m = lod_range.z;
-	if (ortho || m <= 0.0) {
+	if (m <= 0.0) {
 		return false;
 	}
 	float d = distance(origin, cam);
@@ -75,9 +79,9 @@ bool lod_discard(vec3 origin, vec3 cam, vec2 frag, bool ortho) {
 
 // Whole-instance cull for MultiMesh cells (cell ranges are widened by the cell radius).
 // Callers collapse VERTEX to a point -> degenerate triangles, nothing rasterized.
-bool lod_out_of_range(vec3 origin, vec3 cam, bool ortho) {
+bool lod_out_of_range(vec3 origin, vec3 cam) {
 	float m = lod_range.z;
-	if (ortho || m <= 0.0) {
+	if (m <= 0.0) {
 		return false;
 	}
 	float d = distance(origin, cam);

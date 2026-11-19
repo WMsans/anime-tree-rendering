@@ -1,7 +1,8 @@
 shader_type spatial;
-// Camera-facing scalloped cards. Every card of a clump shades and writes depth as the
-// clump ellipsoid, so normal + depth are continuous inside a clump and the outline pass
-// only draws at clump silhouettes / between clumps.
+// Camera-facing scalloped cards. Each card corner is slid along its view ray onto the clump
+// ellipsoid (screen shape unchanged), and every pixel shades with the exact ellipsoid
+// normal, so depth + normal are continuous inside a clump and the outline pass only draws
+// at clump silhouettes / between clumps. No DEPTH write -> early-z stays on.
 render_mode skip_vertex_transform, cull_disabled, specular_disabled, ambient_light_disabled;
 
 #include "res://addons/anime_trees/shaders/cel_ramp.gdshaderinc"
@@ -16,7 +17,7 @@ uniform float near_fade_start = 1.5;
 uniform float near_fade_end = 0.5;
 uniform float alpha_cut = 0.5;
 
-varying vec3 v_obj;       // fragment position on the card, object space
+varying vec3 v_obj;       // point on the (bent) card, object space; lies on the pixel ray
 varying vec3 v_cam_obj;   // camera position, object space
 varying vec3 v_fwd_obj;   // camera forward, object space (orthographic / shadow pass)
 varying vec3 v_center;
@@ -24,7 +25,29 @@ varying vec3 v_radii;
 varying vec2 v_atlas_uv;
 varying float v_blotch;   // set in fragment, read in light
 
+// Ray vs ellipsoid in unit-sphere space; on a miss, the closest approach (scallop fringe).
+vec3 ellipsoid_hit(vec3 ro, vec3 rd, vec3 c, vec3 radii) {
+	vec3 q = (ro - c) / radii;
+	vec3 dd = rd / radii;
+	float a = dot(dd, dd);
+	float b = dot(q, dd);
+	float h = b * b - a * (dot(q, q) - 1.0);
+	float t = h > 0.0 ? (-b - sqrt(h)) / a : -b / a;
+	return ro + rd * t;
+}
+
+// Ray through object-space point p: from the camera, or along forward for ortho (shadows).
+vec3 ray_hit(vec3 p, vec3 cam, vec3 fwd, bool ortho, vec3 c, vec3 radii) {
+	vec3 rd = ortho ? fwd : normalize(p - cam);
+	vec3 ro = ortho ? p - rd * (dot(p - c, rd) + 4.0 * length(radii)) : cam;
+	return ellipsoid_hit(ro, rd, c, radii);
+}
+
 void vertex() {
+	v_main_cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, MAIN_CAM_INV_VIEW_MATRIX[3].xyz)) {
+		VERTEX = vec3(0.0); // whole instance out of its LOD range: collapse, skip the rest
+	} else {
 	vec3 center_view = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float half_size = CUSTOM1.w;
 	float d = length(center_view);
@@ -36,44 +59,33 @@ void vertex() {
 	float model_scale = length(MODEL_MATRIX[0].xyz);
 	vec3 view_pos = center_view + vec3(corner * half_size * model_scale, 0.0);
 	mat4 inv_mv = inverse(MODELVIEW_MATRIX);
-	v_obj = (inv_mv * vec4(view_pos, 1.0)).xyz;
 	v_cam_obj = (inv_mv * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	v_fwd_obj = normalize((inv_mv * vec4(0.0, 0.0, -1.0, 0.0)).xyz);
 	v_center = CUSTOM0.xyz;
 	v_radii = CUSTOM0.w * CUSTOM1.xyz;
+	bool ortho = PROJECTION_MATRIX[3][3] == 1.0;
+	v_obj = ray_hit((inv_mv * vec4(view_pos, 1.0)).xyz, v_cam_obj, v_fwd_obj, ortho, v_center, v_radii);
+	view_pos = (MODELVIEW_MATRIX * vec4(v_obj, 1.0)).xyz;
 	float cell = UV2.x;
 	v_atlas_uv = (UV + vec2(mod(cell, 2.0), floor(cell / 2.0))) * 0.5;
 	VERTEX = view_pos;
-	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
-		VERTEX = vec3(0.0);
-	}
 	NORMAL = vec3(0.0, 0.0, 1.0);
+	}
 }
 
 void fragment() {
-	if (lod_discard(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, FRAGCOORD.xy, PROJECTION_MATRIX[3][3] == 1.0)) {
+	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
 		discard;
 	}
 	if (texture(scallop_atlas, v_atlas_uv).a < alpha_cut) {
 		discard;
 	}
 	bool ortho = PROJECTION_MATRIX[3][3] == 1.0;
-	vec3 rd = ortho ? v_fwd_obj : normalize(v_obj - v_cam_obj);
-	vec3 ro = ortho ? v_obj - rd * dot(v_obj - v_center, rd) * 2.0 - rd * 4.0 * length(v_radii) : v_cam_obj;
-	// Ray vs ellipsoid in unit-sphere space; on a miss use the closest approach (scallop fringe).
-	vec3 q = (ro - v_center) / v_radii;
-	vec3 dd = rd / v_radii;
-	float a = dot(dd, dd);
-	float b = dot(q, dd);
-	float h = b * b - a * (dot(q, q) - 1.0);
-	float t = h > 0.0 ? (-b - sqrt(h)) / a : -b / a;
-	vec3 hit = ro + rd * t;
+	vec3 hit = ray_hit(v_obj, v_cam_obj, v_fwd_obj, ortho, v_center, v_radii);
 	vec3 n_obj = normalize((hit - v_center) / (v_radii * v_radii));
 
 	mat4 mv = VIEW_MATRIX * MODEL_MATRIX;
 	vec3 hit_view = (mv * vec4(hit, 1.0)).xyz;
-	vec4 clip = PROJECTION_MATRIX * vec4(hit_view, 1.0);
-	DEPTH = clip.z / clip.w;
 	LIGHT_VERTEX = hit_view; // shadows/lights sample at the ellipsoid surface, not the card
 	NORMAL = normalize(mat3(mv) * n_obj);
 	ROUGHNESS = 0.5;

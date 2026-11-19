@@ -144,8 +144,9 @@ func _bake_variant(tree: AnimeTree, dir: String) -> ShaderMaterial:
 		albedo.blit_rect(frames[0], Rect2i(Vector2i.ZERO, Vector2i(frame_px, frame_px)), at)
 		ndsh.blit_rect(frames[1], Rect2i(Vector2i.ZERO, Vector2i(frame_px, frame_px)), at)
 
+	albedo.generate_mipmaps()
 	var alb_tex := _save_tex(albedo, dir + id + "_albedo.res")
-	var nd_tex := _save_tex(ndsh, dir + id + "_ndsh.res")
+	var nd_tex := _save_tex(_point_mipmaps(ndsh), dir + id + "_ndsh.res")
 	var mat := ShaderMaterial.new()
 	mat.shader = IMPOSTOR_SHADER
 	mat.set_shader_parameter("albedo_atlas", alb_tex)
@@ -193,6 +194,17 @@ func _encode_frame(ink: PackedByteArray, plain: PackedByteArray, nd: PackedByteA
 		nds[p + 3] = bits
 	return [Image.create_from_data(frame_px, frame_px, false, Image.FORMAT_RGBA8, alb),
 		Image.create_from_data(frame_px, frame_px, false, Image.FORMAT_RGBA8, nds)]
+
+
+## Mip chain by point sampling: averaging would corrupt octa normals and shadow bit masks.
+func _point_mipmaps(img: Image) -> Image:
+	var data := img.get_data()
+	var level := img
+	while level.get_width() > 1:
+		level = level.duplicate()
+		level.resize(level.get_width() / 2, level.get_height() / 2, Image.INTERPOLATE_NEAREST)
+		data.append_array(level.get_data())
+	return Image.create_from_data(img.get_width(), img.get_height(), true, Image.FORMAT_RGBA8, data)
 
 
 func _save_tex(img: Image, path: String) -> Texture2D:

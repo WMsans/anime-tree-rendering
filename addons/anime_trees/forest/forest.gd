@@ -8,7 +8,8 @@ extends Node3D
 @export var data: ForestData
 @export var impostor_set: ImpostorSet
 @export var ground: MeshInstance3D
-@export var cell_size := 64.0
+@export var cell_size := 128.0     ## LOD1 / impostor cells
+@export var lod0_cell_size := 32.0 ## LOD0 cells: small, so culled-but-drawn full trees stay few
 @export var scatter_rect := Rect2(-200, -200, 400, 400)
 @export var density_per_ha := 120.0
 @export var variant_weights := PackedFloat32Array()  ## empty = uniform
@@ -84,15 +85,18 @@ func rebuild() -> void:
 	var variants := []
 	for ps in data.variant_scenes:
 		variants.append(_variant_info(ps))
-	var half := cell_size * 0.5 * sqrt(2.0)
-	var cells := ForestChunker.chunk(data, cell_size)
+	for lod: String in LODS:
+		var size := lod0_cell_size if lod == "LOD0" else cell_size
+		_build_lod(lod, size, ForestChunker.chunk(data, size), variants)
+
+
+func _build_lod(lod: String, size: float, cells: Dictionary, variants: Array) -> void:
+	var half := size * 0.5 * sqrt(2.0)
 	for cell: Vector2i in cells:
-		var center := Vector3((cell.x + 0.5) * cell_size, 0.0, (cell.y + 0.5) * cell_size)
+		var center := Vector3((cell.x + 0.5) * size, 0.0, (cell.y + 0.5) * size)
 		for vi: int in cells[cell]:
 			var info: Dictionary = variants[vi]
-			for lod: String in LODS:
-				if not info.meshes.has(lod):
-					continue
+			if info.meshes.has(lod):
 				var mm := MultiMesh.new()
 				mm.transform_format = MultiMesh.TRANSFORM_3D
 				mm.mesh = info.meshes[lod]

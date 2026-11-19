@@ -1,0 +1,150 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/anime_trees/impostor/impostor_baker.gd" id="1_l4ku7"]
+[ext_resource type="PackedScene" path="res://assets/trees/banyan_001.glb" id="2_4wrci"]
+[ext_resource type="PackedScene" path="res://assets/trees/banyan_002.glb" id="3_6wtsx"]
+[ext_resource type="PackedScene" path="res://assets/trees/banyan_003.glb" id="4_hntrk"]
+[ext_resource type="PackedScene" path="res://assets/trees/jungle_tall_001.glb" id="5_qqi43"]
+[ext_resource type="PackedScene" path="res://assets/trees/jungle_tall_002.glb" id="6_ct8rq"]
+[ext_resource type="PackedScene" path="res://assets/trees/jungle_tall_003.glb" id="7_x85nr"]
+[ext_resource type="PackedScene" path="res://assets/trees/leaning_001.glb" id="8_3xut5"]
+[ext_resource type="PackedScene" path="res://assets/trees/leaning_002.glb" id="9_1412n"]
+[ext_resource type="PackedScene" path="res://assets/trees/leaning_003.glb" id="10_bt86r"]
+[ext_resource type="PackedScene" path="res://assets/trees/broadleaf_001.glb" id="11_s6o17"]
+[ext_resource type="PackedScene" path="res://assets/trees/broadleaf_002.glb" id="12_wf2ct"]
+[ext_resource type="PackedScene" path="res://assets/trees/broadleaf_003.glb" id="13_d13tm"]
+[ext_resource type="Script" path="res://addons/anime_trees/forest/forest.gd" id="14_ov7lq"]
+[ext_resource type="Resource" path="res://demo/forest_demo_data.tres" id="15_uxcbh"]
+[ext_resource type="Resource" path="res://impostors/forest_demo/impostor_set.tres" id="16_kcnwa"]
+[ext_resource type="Script" path="res://addons/anime_trees/tree/anime_tree.gd" id="17_ybm4m"]
+[ext_resource type="Script" path="res://demo/camera_rig.gd" id="18_tg2fu"]
+[ext_resource type="Script" path="res://addons/anime_trees/outline/outline_effect.gd" id="19_f4d4u"]
+
+[sub_resource type="Environment" id="Environment_vr0rx"]
+background_mode = 1
+background_color = Color(0.62352943, 0.8627451, 0.9372549, 1)
+fog_enabled = true
+fog_light_color = Color(0.49803922, 0.6901961, 0.2901961, 1)
+fog_density = 0.0009
+fog_sky_affect = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lhmi4"]
+shading_mode = 0
+albedo_color = Color(0.3019608, 0.47843137, 0.16470589, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_rn776"]
+material = SubResource("StandardMaterial3D_lhmi4")
+size = Vector2(2000, 2000)
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_3ubkx"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("19_f4d4u")
+
+[sub_resource type="Compositor" id="Compositor_27o2r"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_3ubkx")])
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_177nm"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("19_f4d4u")
+
+[sub_resource type="Compositor" id="Compositor_annu1"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_177nm")])
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_3ld4w"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("19_f4d4u")
+
+[sub_resource type="Compositor" id="Compositor_n81a7"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_3ld4w")])
+
+[node name="ForestDemo" type="Node3D" unique_id=713742020]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=884571549]
+transform = Transform3D(0.81915206, -0.46984634, 0.32898995, 0, 0.57357645, 0.81915206, -0.57357645, -0.6710101, 0.46984634, 0, 0, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 80.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=972505307]
+environment = SubResource("Environment_vr0rx")
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=221110747]
+mesh = SubResource("PlaneMesh_rn776")
+
+[node name="ImpostorBaker" type="Node" parent="." unique_id=908331403 node_paths=PackedStringArray("sun")]
+script = ExtResource("1_l4ku7")
+variants = Array[PackedScene]([ExtResource("2_4wrci"), ExtResource("3_6wtsx"), ExtResource("4_hntrk"), ExtResource("5_qqi43"), ExtResource("6_ct8rq"), ExtResource("7_x85nr"), ExtResource("8_3xut5"), ExtResource("9_1412n"), ExtResource("10_bt86r"), ExtResource("11_s6o17"), ExtResource("12_wf2ct"), ExtResource("13_d13tm")])
+sun = NodePath("../Sun")
+output_dir = "res://impostors/forest_demo/"
+
+[node name="Forest" type="Node3D" parent="." unique_id=1374332122 node_paths=PackedStringArray("ground")]
+script = ExtResource("14_ov7lq")
+data = ExtResource("15_uxcbh")
+impostor_set = ExtResource("16_kcnwa")
+ground = NodePath("../Ground")
+cell_size = 128.0
+scatter_rect = Rect2(-600, -600, 1200, 1200)
+density_per_ha = 80.0
+variant_weights = PackedFloat32Array(1, 1, 1, 1.5, 1.5, 1.5, 1.2, 1.2, 1.2, 2, 2, 2)
+seed = 11
+
+[node name="Hero_banyan_001" type="Node3D" parent="." unique_id=82658116 instance=ExtResource("2_4wrci")]
+script = ExtResource("17_ybm4m")
+lod0_end = 45.0
+lod1_end = 180.0
+impostor_set = ExtResource("16_kcnwa")
+variant_id = "banyan_001"
+
+[node name="Hero_banyan_002" type="Node3D" parent="." unique_id=2082340684 instance=ExtResource("3_6wtsx")]
+transform = Transform3D(0.26749888, 0, 0.9635582, 0, 1, 0, -0.9635582, 0, 0.26749888, 22, 0, -10)
+script = ExtResource("17_ybm4m")
+lod0_end = 45.0
+lod1_end = 180.0
+impostor_set = ExtResource("16_kcnwa")
+variant_id = "banyan_002"
+
+[node name="Hero_banyan_003" type="Node3D" parent="." unique_id=104368641 instance=ExtResource("4_hntrk")]
+transform = Transform3D(-0.8568887, 0, 0.51550144, 0, 1, 0, -0.51550144, 0, -0.8568887, -20, 0, 12)
+script = ExtResource("17_ybm4m")
+lod0_end = 45.0
+lod1_end = 180.0
+impostor_set = ExtResource("16_kcnwa")
+variant_id = "banyan_003"
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=1092672812]
+script = ExtResource("18_tg2fu")
+
+[node name="@CanvasLayer@132" type="CanvasLayer" parent="CameraRig" unique_id=1722469053]
+
+[node name="CamWalk" type="Camera3D" parent="CameraRig" unique_id=817067972]
+transform = Transform3D(0.70710677, 0.22632205, 0.6699092, 0, 0.94739467, -0.32006773, -0.70710677, 0.22632205, 0.6699092, 9, 1.7, 9)
+compositor = SubResource("Compositor_27o2r")
+current = true
+fov = 60.0
+far = 2500.0
+
+[node name="CamOrbit" type="Camera3D" parent="CameraRig" unique_id=608491640]
+transform = Transform3D(1, 0, 0, 0, 0.99778515, 0.06651902, 0, -0.06651902, 0.99778515, 0, 14, 60)
+compositor = SubResource("Compositor_annu1")
+fov = 60.0
+far = 2500.0
+
+[node name="CamFly" type="Camera3D" parent="CameraRig" unique_id=352300448]
+transform = Transform3D(1, 0, 0, 0, 0.9486833, 0.31622776, 0, -0.31622776, 0.9486833, 0, 150, 300)
+compositor = SubResource("Compositor_n81a7")
+fov = 60.0
+far = 2500.0

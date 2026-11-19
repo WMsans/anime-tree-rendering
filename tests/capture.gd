@@ -17,6 +17,7 @@ func _initialize() -> void:
 	var scene: Node = (load(a[0]) as PackedScene).instantiate()
 	vp.add_child(scene)
 	if a.size() > 2 and a[2] != "":
+		await process_frame  # e.g. the demo camera rig picks its own camera in _ready
 		(scene.find_child(a[2], true, false) as Camera3D).make_current()
 	var frames := int(a[3]) if a.size() > 3 else 30
 	for i in frames:

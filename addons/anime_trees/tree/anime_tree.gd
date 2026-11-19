@@ -10,7 +10,7 @@ extends Node3D
 	set(v): lod1_end = v; apply_lod()
 @export var impostor_end := 2000.0:
 	set(v): impostor_end = v; apply_lod()
-@export var fade_margin := 8.0:
+@export var fade_margin := 4.0:
 	set(v): fade_margin = v; apply_lod()
 @export var impostor_set: ImpostorSet:
 	set(v): impostor_set = v; _apply_impostor()

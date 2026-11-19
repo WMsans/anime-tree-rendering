@@ -93,8 +93,14 @@ func test_cell_ranges_cover_instances() -> void:
 	var f := _forest()
 	f.scatter()
 	f.rebuild()
-	for mmi: MultiMeshInstance3D in f.find_children("*LOD0*", "MultiMeshInstance3D", true, false):
+	var n0 := 0
+	var n1 := 0
+	for mmi in f.get_child(0).get_children():
+		var lod0: bool = String(mmi.name).ends_with("LOD0")
 		var lr: Vector3 = mmi.get_instance_shader_parameter("lod_range")
-		var half := f.cell_size * 0.5 * sqrt(2.0)
-		check(mmi.visibility_range_end >= lr.y + lr.z + half - 0.01, "cell end too short")
+		var half := (f.lod0_cell_size if lod0 else f.cell_size) * 0.5 * sqrt(2.0)
+		check(absf(mmi.visibility_range_end - (lr.y + lr.z + half)) < 0.01, "%s end %f" % [mmi.name, mmi.visibility_range_end])
+		n0 += int(lod0)
+		n1 += int(String(mmi.name).ends_with("LOD1"))
+	check(n0 > n1, "LOD0 should use smaller cells: %d vs %d" % [n0, n1])
 	f.free()

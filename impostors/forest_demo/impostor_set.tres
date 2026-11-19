@@ -1,0 +1,177 @@
+[gd_resource type="Resource" script_class="ImpostorSet" format=3]
+
+[ext_resource type="Shader" path="res://addons/anime_trees/shaders/impostor.gdshader" id="1_81xpc"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_001_albedo.res" id="2_xvexo"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_001_ndsh.res" id="3_bc7li"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_002_albedo.res" id="4_6xw7h"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_002_ndsh.res" id="5_cw60u"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_003_albedo.res" id="6_f8m8g"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/banyan_003_ndsh.res" id="7_ir0c3"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_001_albedo.res" id="8_pgfdl"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_001_ndsh.res" id="9_eav33"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_002_albedo.res" id="10_7m2gi"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_002_ndsh.res" id="11_ang4l"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_003_albedo.res" id="12_haubw"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/jungle_tall_003_ndsh.res" id="13_neb4x"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_001_albedo.res" id="14_wphx5"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_001_ndsh.res" id="15_j1y1k"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_002_albedo.res" id="16_g787g"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_002_ndsh.res" id="17_840jj"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_003_albedo.res" id="18_7033e"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/leaning_003_ndsh.res" id="19_xuh3o"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_001_albedo.res" id="20_jugx3"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_001_ndsh.res" id="21_2a8ro"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_002_albedo.res" id="22_tqf5h"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_002_ndsh.res" id="23_wahkc"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_003_albedo.res" id="24_03hrf"]
+[ext_resource type="Texture2D" path="res://impostors/forest_demo/broadleaf_003_ndsh.res" id="25_24jta"]
+[ext_resource type="Script" path="res://addons/anime_trees/impostor/impostor_set.gd" id="26_wjhaf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_81xpc"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("2_xvexo")
+shader_parameter/ndsh_atlas = ExtResource("3_bc7li")
+shader_parameter/impostor_center = Vector3(-0.48282623, 8.654067, -0.07360363)
+shader_parameter/impostor_radius = 13.902786
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xvexo"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("4_6xw7h")
+shader_parameter/ndsh_atlas = ExtResource("5_cw60u")
+shader_parameter/impostor_center = Vector3(-0.6902094, 9.163603, 0.20653915)
+shader_parameter/impostor_radius = 14.626352
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bc7li"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("6_f8m8g")
+shader_parameter/ndsh_atlas = ExtResource("7_ir0c3")
+shader_parameter/impostor_center = Vector3(0.21634007, 8.489374, -0.5049534)
+shader_parameter/impostor_radius = 13.704454
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6xw7h"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("8_pgfdl")
+shader_parameter/ndsh_atlas = ExtResource("9_eav33")
+shader_parameter/impostor_center = Vector3(-0.09904432, 13.004213, 0.34506083)
+shader_parameter/impostor_radius = 14.933306
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cw60u"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("10_7m2gi")
+shader_parameter/ndsh_atlas = ExtResource("11_ang4l")
+shader_parameter/impostor_center = Vector3(-0.45491505, 14.913441, 0.25851202)
+shader_parameter/impostor_radius = 17.85949
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f8m8g"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("12_haubw")
+shader_parameter/ndsh_atlas = ExtResource("13_neb4x")
+shader_parameter/impostor_center = Vector3(0.113102436, 14.025781, -0.6688628)
+shader_parameter/impostor_radius = 16.497536
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ir0c3"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("14_wphx5")
+shader_parameter/ndsh_atlas = ExtResource("15_j1y1k")
+shader_parameter/impostor_center = Vector3(0.62052727, 6.5870967, -3.1181993)
+shader_parameter/impostor_radius = 10.350424
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pgfdl"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("16_g787g")
+shader_parameter/ndsh_atlas = ExtResource("17_840jj")
+shader_parameter/impostor_center = Vector3(3.526732, 6.934257, -1.3269763)
+shader_parameter/impostor_radius = 9.879225
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eav33"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("18_7033e")
+shader_parameter/ndsh_atlas = ExtResource("19_xuh3o")
+shader_parameter/impostor_center = Vector3(-0.7858329, 6.1435976, -3.441372)
+shader_parameter/impostor_radius = 9.372835
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7m2gi"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("20_jugx3")
+shader_parameter/ndsh_atlas = ExtResource("21_2a8ro")
+shader_parameter/impostor_center = Vector3(-0.09850001, 2.7177558, -0.32607603)
+shader_parameter/impostor_radius = 4.495845
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ang4l"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("22_tqf5h")
+shader_parameter/ndsh_atlas = ExtResource("23_wahkc")
+shader_parameter/impostor_center = Vector3(0.38491797, 2.92919, -0.2047286)
+shader_parameter/impostor_radius = 4.9391813
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_haubw"]
+render_priority = 0
+shader = ExtResource("1_81xpc")
+shader_parameter/albedo_atlas = ExtResource("24_03hrf")
+shader_parameter/ndsh_atlas = ExtResource("25_24jta")
+shader_parameter/impostor_center = Vector3(0.041275978, 2.8026865, -0.0677433)
+shader_parameter/impostor_radius = 4.659243
+shader_parameter/mid_ratio = Vector3(0.4330635, 0.6583982, 0.75787956)
+shader_parameter/dark_ratio = Vector3(0.22058626, 0.41130853, 0.56168944)
+shader_parameter/alpha_cut = 0.25
+
+[resource]
+script = ExtResource("26_wjhaf")
+entries = {
+"banyan_001": SubResource("ShaderMaterial_81xpc"),
+"banyan_002": SubResource("ShaderMaterial_xvexo"),
+"banyan_003": SubResource("ShaderMaterial_bc7li"),
+"broadleaf_001": SubResource("ShaderMaterial_7m2gi"),
+"broadleaf_002": SubResource("ShaderMaterial_ang4l"),
+"broadleaf_003": SubResource("ShaderMaterial_haubw"),
+"jungle_tall_001": SubResource("ShaderMaterial_6xw7h"),
+"jungle_tall_002": SubResource("ShaderMaterial_cw60u"),
+"jungle_tall_003": SubResource("ShaderMaterial_f8m8g"),
+"leaning_001": SubResource("ShaderMaterial_ir0c3"),
+"leaning_002": SubResource("ShaderMaterial_pgfdl"),
+"leaning_003": SubResource("ShaderMaterial_eav33")
+}

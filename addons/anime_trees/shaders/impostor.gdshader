@@ -8,8 +8,8 @@ render_mode skip_vertex_transform, cull_disabled, specular_disabled, ambient_lig
 
 const int FRAMES = 8; // == HemiOct.FRAMES
 
-uniform sampler2D albedo_atlas : source_color, filter_nearest;
-uniform sampler2D ndsh_atlas : filter_nearest;
+uniform sampler2D albedo_atlas : source_color, filter_nearest_mipmap;
+uniform sampler2D ndsh_atlas : filter_nearest_mipmap; // point-sampled mips (bits stay valid)
 uniform vec3 impostor_center;
 uniform float impostor_radius = 1.0;
 uniform vec3 mid_ratio = vec3(0.66, 0.83, 0.85);
@@ -53,6 +53,10 @@ vec2 frame_local_uv(vec2 frame, vec3 cam, vec3 p) {
 }
 
 void vertex() {
+	v_main_cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, MAIN_CAM_INV_VIEW_MATRIX[3].xyz)) {
+		VERTEX = vec3(0.0); // whole instance out of its LOD range: collapse, skip the rest
+	} else {
 	vec3 c_view = (MODELVIEW_MATRIX * vec4(impostor_center, 1.0)).xyz;
 	float s = length(MODEL_MATRIX[0].xyz);
 	vec2 corner = (UV * 2.0 - 1.0) * vec2(1.0, -1.0);
@@ -72,14 +76,12 @@ void vertex() {
 	v_uv01 = vec4(frame_local_uv(fr[0], cam_obj, p_obj), frame_local_uv(fr[1], cam_obj, p_obj));
 	v_uv23 = vec4(frame_local_uv(fr[2], cam_obj, p_obj), frame_local_uv(fr[3], cam_obj, p_obj));
 	VERTEX = view_pos;
-	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
-		VERTEX = vec3(0.0);
-	}
 	NORMAL = vec3(0.0, 0.0, 1.0);
+	}
 }
 
 void fragment() {
-	if (lod_discard(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, FRAGCOORD.xy, false)) {
+	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
 		discard;
 	}
 	// One frame per pixel, chosen by ordered dither against the weights: crisp, no ghosting.

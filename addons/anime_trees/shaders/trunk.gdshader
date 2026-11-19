@@ -22,10 +22,12 @@ varying float v_line;
 varying float v_blotch;
 
 void vertex() {
+	v_main_cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
+	if (lod_out_of_range(MODEL_MATRIX[3].xyz, MAIN_CAM_INV_VIEW_MATRIX[3].xyz)) {
+		VERTEX = vec3(0.0); // whole instance out of its LOD range: collapse, skip the rest
+	} else {
 	v_obj = VERTEX;
 	v_moss_attr = COLOR.r;
-	if (lod_out_of_range(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, PROJECTION_MATRIX[3][3] == 1.0)) {
-		VERTEX = vec3(0.0);
 	}
 }
 
@@ -35,7 +37,7 @@ vec3 trunk_color(int band, float moss, float line) {
 }
 
 void fragment() {
-	if (lod_discard(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, FRAGCOORD.xy, PROJECTION_MATRIX[3][3] == 1.0)) {
+	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
 		discard;
 	}
 	float m = v_moss_attr * 0.7 + cel_noise(v_obj * 1.3) * 0.5;
