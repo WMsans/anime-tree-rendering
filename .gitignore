@@ -2,3 +2,5 @@
 .godot/
 /android/
 tests/out/
+__pycache__/
+.superpowers/
