@@ -20,7 +20,11 @@ func _ready() -> void:
 	apply_lod()
 
 
+## Visibility ranges overlap by fade_margin; inside the overlap the shaders dither-crossfade
+## (lod_range instance uniform). Godot's own fade is alpha-blended, which would drop the
+## trees out of the depth/normal buffers and so out of the outline.
 func apply_lod() -> void:
+	var m := fade_margin
 	var ranges := {
 		"LOD0": Vector2(0.0, lod0_end),
 		"LOD1": Vector2(lod0_end, lod1_end),
@@ -31,8 +35,9 @@ func apply_lod() -> void:
 		if g == null:
 			continue
 		var r: Vector2 = ranges[n]
-		g.visibility_range_begin = r.x
-		g.visibility_range_begin_margin = fade_margin if r.x > 0.0 else 0.0
-		g.visibility_range_end = r.y
-		g.visibility_range_end_margin = fade_margin
-		g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		g.visibility_range_begin = maxf(0.0, r.x - m) if r.x > 0.0 else 0.0
+		g.visibility_range_end = r.y + m if n != "Impostor" else r.y
+		g.visibility_range_begin_margin = 0.0
+		g.visibility_range_end_margin = 0.0
+		g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+		g.set_instance_shader_parameter("lod_range", Vector3(r.x, r.y, m))

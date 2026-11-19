@@ -32,6 +32,9 @@ vec3 trunk_color(int band, float moss, float line) {
 }
 
 void fragment() {
+	if (lod_discard(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, FRAGCOORD.xy, PROJECTION_MATRIX[3][3] == 1.0)) {
+		discard;
+	}
 	float m = v_moss_attr * 0.7 + cel_noise(v_obj * 1.3) * 0.5;
 	v_moss = step(moss_threshold + 0.25, m);
 	v_line = step(0.5, texture(bark_lines, UV * vec2(bark_u_repeat, 1.0)).r) * (1.0 - v_moss);

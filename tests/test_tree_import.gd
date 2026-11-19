@@ -24,18 +24,23 @@ func test_scene_structure() -> void:
 
 
 func test_visibility_ranges() -> void:
+	# Ranges overlap by fade_margin; the shaders dither-crossfade inside the overlap
+	# (Godot's own fade is alpha-blended, which breaks depth/normal and so the outline).
 	tree = _load()
 	tree.apply_lod()
+	var m: float = tree.fade_margin
 	var l0: GeometryInstance3D = tree.get_node("LOD0")
 	var l1: GeometryInstance3D = tree.get_node("LOD1")
 	var im: GeometryInstance3D = tree.get_node("Impostor")
-	check(near(l0.visibility_range_end, tree.lod0_end), "LOD0 end")
-	check(near(l1.visibility_range_begin, tree.lod0_end), "LOD1 begin")
-	check(near(l1.visibility_range_end, tree.lod1_end), "LOD1 end")
-	check(near(im.visibility_range_begin, tree.lod1_end), "Impostor begin")
+	check(near(l0.visibility_range_end, tree.lod0_end + m), "LOD0 end")
+	check(near(l1.visibility_range_begin, tree.lod0_end - m), "LOD1 begin")
+	check(near(l1.visibility_range_end, tree.lod1_end + m), "LOD1 end")
+	check(near(im.visibility_range_begin, tree.lod1_end - m), "Impostor begin")
 	check(near(im.visibility_range_end, tree.impostor_end), "Impostor end")
 	for g in [l0, l1, im]:
-		check(g.visibility_range_fade_mode == GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF, "fade mode")
+		check(g.visibility_range_fade_mode == GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED, "fade mode")
+	check(l0.get_instance_shader_parameter("lod_range") == Vector3(0.0, tree.lod0_end, m), "LOD0 lod_range")
+	check(l1.get_instance_shader_parameter("lod_range") == Vector3(tree.lod0_end, tree.lod1_end, m), "LOD1 lod_range")
 	check(tree.lod0_end > 30.0, "banyan LOD distance multiplier applied: %f" % tree.lod0_end)
 	tree.free()
 

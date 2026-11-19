@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cya4ex4bg54bd"
+path="res://.godot/imported/outline.glsl-8529d27064da367b644dcf7e1e479dd8.res"
+
+[deps]
+
+source_file="res://addons/anime_trees/outline/outline.glsl"
+dest_files=["res://.godot/imported/outline.glsl-8529d27064da367b644dcf7e1e479dd8.res"]
+
+[params]
+

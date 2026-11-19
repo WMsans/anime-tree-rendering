@@ -48,6 +48,9 @@ void vertex() {
 }
 
 void fragment() {
+	if (lod_discard(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD, FRAGCOORD.xy, PROJECTION_MATRIX[3][3] == 1.0)) {
+		discard;
+	}
 	if (texture(scallop_atlas, v_atlas_uv).a < alpha_cut) {
 		discard;
 	}

@@ -1,69 +1,109 @@
 [gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://assets/trees/banyan_001.glb" id="1_qbeue"]
-[ext_resource type="Script" path="res://addons/anime_trees/tree/anime_tree.gd" id="2_37yho"]
-[ext_resource type="PackedScene" path="res://assets/trees/broadleaf_001.glb" id="3_qitvh"]
-[ext_resource type="PackedScene" path="res://assets/trees/leaning_001.glb" id="4_u1gmv"]
-[ext_resource type="PackedScene" path="res://assets/trees/jungle_tall_001.glb" id="5_6voay"]
+[ext_resource type="PackedScene" path="res://assets/trees/banyan_001.glb" id="1_37yho"]
+[ext_resource type="Script" path="res://addons/anime_trees/tree/anime_tree.gd" id="2_qitvh"]
+[ext_resource type="PackedScene" path="res://assets/trees/broadleaf_001.glb" id="3_u1gmv"]
+[ext_resource type="PackedScene" path="res://assets/trees/leaning_001.glb" id="4_6voay"]
+[ext_resource type="PackedScene" path="res://assets/trees/jungle_tall_001.glb" id="5_r8vgd"]
+[ext_resource type="Script" path="res://addons/anime_trees/outline/outline_effect.gd" id="6_ciabj"]
 
-[sub_resource type="Environment" id="Environment_r8vgd"]
+[sub_resource type="Environment" id="Environment_axd77"]
 background_mode = 1
 background_color = Color(0.62352943, 0.8627451, 0.9372549, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ciabj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_absdf"]
 shading_mode = 0
 albedo_color = Color(0.3019608, 0.47843137, 0.16470589, 1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_axd77"]
-material = SubResource("StandardMaterial3D_ciabj")
+[sub_resource type="PlaneMesh" id="PlaneMesh_q2jxn"]
+material = SubResource("StandardMaterial3D_absdf")
 size = Vector2(300, 300)
 
-[node name="TreeCloseup" type="Node3D" unique_id=413488121]
+[sub_resource type="CompositorEffect" id="CompositorEffect_cbspy"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("6_ciabj")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=170059130]
+[sub_resource type="Compositor" id="Compositor_y05px"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_cbspy")])
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_jqkq3"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("6_ciabj")
+
+[sub_resource type="Compositor" id="Compositor_78ec7"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_jqkq3")])
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_446qv"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = true
+script = ExtResource("6_ciabj")
+
+[sub_resource type="Compositor" id="Compositor_qghpx"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_446qv")])
+
+[node name="TreeCloseup" type="Node3D" unique_id=2129748393]
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=273000972]
 transform = Transform3D(0.81915206, -0.43938506, 0.36868784, 0, 0.64278764, 0.76604444, -0.57357645, -0.62750685, 0.5265408, 0, 0, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 120.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1570451446]
-environment = SubResource("Environment_r8vgd")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1575448639]
+environment = SubResource("Environment_axd77")
 
-[node name="Ground" type="MeshInstance3D" parent="." unique_id=851287702]
-mesh = SubResource("PlaneMesh_axd77")
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1259832339]
+mesh = SubResource("PlaneMesh_q2jxn")
 
-[node name="banyan_001" type="Node3D" parent="." unique_id=82658116 instance=ExtResource("1_qbeue")]
-script = ExtResource("2_37yho")
+[node name="banyan_001" type="Node3D" parent="." unique_id=82658116 instance=ExtResource("1_37yho")]
+script = ExtResource("2_qitvh")
 lod0_end = 45.0
 lod1_end = 180.0
 variant_id = "banyan_001"
 
-[node name="broadleaf_001" type="Node3D" parent="." unique_id=291520150 instance=ExtResource("3_qitvh")]
+[node name="broadleaf_001" type="Node3D" parent="." unique_id=291520150 instance=ExtResource("3_u1gmv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 6)
-script = ExtResource("2_37yho")
+script = ExtResource("2_qitvh")
 lod0_end = 18.0
 lod1_end = 72.0
 variant_id = "broadleaf_001"
 
-[node name="leaning_001" type="Node3D" parent="." unique_id=125344539 instance=ExtResource("4_u1gmv")]
+[node name="leaning_001" type="Node3D" parent="." unique_id=125344539 instance=ExtResource("4_6voay")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -4)
-script = ExtResource("2_37yho")
+script = ExtResource("2_qitvh")
 variant_id = "leaning_001"
 
-[node name="jungle_tall_001" type="Node3D" parent="." unique_id=1894274099 instance=ExtResource("5_6voay")]
+[node name="jungle_tall_001" type="Node3D" parent="." unique_id=1894274099 instance=ExtResource("5_r8vgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -14)
-script = ExtResource("2_37yho")
+script = ExtResource("2_qitvh")
 lod0_end = 39.0
 lod1_end = 156.0
 variant_id = "jungle_tall_001"
 
-[node name="CamClose" type="Camera3D" parent="." unique_id=246179544]
+[node name="CamClose" type="Camera3D" parent="." unique_id=1592339681]
 transform = Transform3D(0.70710677, 0.45430547, 0.54185474, 0, 0.7662983, -0.64248496, -0.70710677, 0.45430547, 0.54185474, 7, 1.7, 7)
+compositor = SubResource("Compositor_y05px")
 fov = 60.0
 
-[node name="CamMid" type="Camera3D" parent="." unique_id=1920831879]
+[node name="CamMid" type="Camera3D" parent="." unique_id=794913623]
 transform = Transform3D(1, 0, 0, 0, 0.99978304, 0.020828813, 0, -0.020828813, 0.99978304, 0, 9, 48)
+compositor = SubResource("Compositor_78ec7")
 fov = 60.0
 
-[node name="CamFar" type="Camera3D" parent="." unique_id=1479342604]
+[node name="CamFar" type="Camera3D" parent="." unique_id=370671825]
 transform = Transform3D(1, 0, 0, 0, 0.99173003, 0.12834154, 0, -0.12834154, 0.99173003, 0, 30, 170)
+compositor = SubResource("Compositor_qghpx")
 fov = 60.0

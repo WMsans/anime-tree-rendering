@@ -49,3 +49,26 @@ float cel_noise(vec3 x) {
 	           mix(mix(cel_hash(i + vec3(0, 0, 1)), cel_hash(i + vec3(1, 0, 1)), f.x),
 	               mix(cel_hash(i + vec3(0, 1, 1)), cel_hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
+
+// Dithered LOD crossfade. lod_range = (begin, end, margin) set per node by AnimeTree/Forest.
+// A LOD keeps a pixel where fade_in >= 1 - t and fade_out > t, so two neighbouring LODs
+// partition the pixels exactly (no holes, no double coverage) inside the overlap.
+instance uniform vec3 lod_range = vec3(0.0, 1e9, 0.0);
+
+float bayer4(vec2 frag) {
+	ivec2 p = ivec2(frag) & ivec2(3);
+	const float m[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+	return (m[p.y * 4 + p.x] + 0.5) / 16.0;
+}
+
+bool lod_discard(vec3 origin, vec3 cam, vec2 frag, bool ortho) {
+	float m = lod_range.z;
+	if (ortho || m <= 0.0) {
+		return false;
+	}
+	float d = distance(origin, cam);
+	float fin = lod_range.x > 0.0 ? smoothstep(lod_range.x - m, lod_range.x + m, d) : 1.0;
+	float fout = 1.0 - smoothstep(lod_range.y - m, lod_range.y + m, d);
+	float t = bayer4(frag);
+	return fin < 1.0 - t || fout <= t;
+}
