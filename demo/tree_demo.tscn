@@ -59,6 +59,8 @@ script = ExtResource("8_cel")
 
 [node name="OutlinePostProcess" type="Node3D" parent="." unique_id=153322400]
 script = ExtResource("2_post")
+outline_color = Color(0.21900001, 0.21900001, 0.3, 1)
+thickness = 3.0
 depth_threshold = 2.0
 
 [node name="Ground" type="MeshInstance3D" parent="." unique_id=745682141]

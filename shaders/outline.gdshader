@@ -8,13 +8,20 @@ uniform vec4 outline_color : source_color = vec4(0.05, 0.05, 0.08, 1.0);
 uniform float thickness = 1.5;
 // Depth gap between two surfaces, in metres, below which no line is drawn.
 uniform float depth_threshold = 0.5;
+// Hue difference (chromaticity distance) that draws a line on the nearer surface
+// even with no depth gap, e.g. leaves pressed against the trunk.
+uniform float color_threshold = 0.08;
 
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
+// Opaque-only copy, before cel shading. Cel shading keeps hue, so this is fine.
+uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
 
 // View-space distance of the opaque surface at uv. Godot 4 uses a reverse-Z buffer,
 // so depth 0 is the far plane: sky, or nothing drawn there. inv_proj has to be
 // handed in because stage built-ins are only visible inside the entry points.
-float view_depth(float d, vec2 uv, mat4 inv_proj) {
+float view_depth(vec2 uv, mat4 inv_proj) {
+	// texture() on the depth sampler is available in helper functions.
+	float d = texture(depth_texture, uv).r;
 	if (d <= 0.0) {
 		return 10000.0;
 	}
@@ -22,9 +29,17 @@ float view_depth(float d, vec2 uv, mat4 inv_proj) {
 	return -view.z / view.w;
 }
 
-float depth_at(vec2 uv) {
-	// texture() on the depth sampler is available in helper functions.
-	return texture(depth_texture, uv).r;
+// Colour with brightness divided out: lighting and cel bands leave it alone,
+// green leaves and brown bark don't.
+vec3 chroma(vec2 uv) {
+	vec3 c = texture(screen_texture, uv).rgb;
+	return c / max(c.r + c.g + c.b, 1e-4);
+}
+
+// Hue step towards a neighbour, counted only when this pixel is in front of it,
+// so the line lands on the occluder (the leaf) and not on the trunk behind.
+float hue_step(vec3 cc, float c, vec2 uv, float n) {
+	return n > c ? distance(cc, chroma(uv)) : 0.0;
 }
 
 void vertex() {
@@ -37,16 +52,23 @@ void fragment() {
 	vec2 r = SCREEN_UV + vec2(o.x, 0.0);
 	vec2 u = SCREEN_UV - vec2(0.0, o.y);
 	vec2 dn = SCREEN_UV + vec2(0.0, o.y);
-	float c = view_depth(depth_at(SCREEN_UV), SCREEN_UV, INV_PROJECTION_MATRIX);
+	float c = view_depth(SCREEN_UV, INV_PROJECTION_MATRIX);
+	float zl = view_depth(l, INV_PROJECTION_MATRIX);
+	float zr = view_depth(r, INV_PROJECTION_MATRIX);
+	float zu = view_depth(u, INV_PROJECTION_MATRIX);
+	float zd = view_depth(dn, INV_PROJECTION_MATRIX);
 	// Second derivative, not a plain difference: a surface receding from the camera
 	// has a large depth difference across it but no line, and this cancels that out.
 	// Across a step between two objects it equals the step in metres, which is
 	// exactly what the threshold is about.
-	float lap = abs(view_depth(depth_at(l), l, INV_PROJECTION_MATRIX)
-			+ view_depth(depth_at(r), r, INV_PROJECTION_MATRIX) - 2.0 * c)
-			+ abs(view_depth(depth_at(u), u, INV_PROJECTION_MATRIX)
-			+ view_depth(depth_at(dn), dn, INV_PROJECTION_MATRIX) - 2.0 * c);
+	float lap = abs(zl + zr - 2.0 * c) + abs(zu + zd - 2.0 * c);
 	float edge = smoothstep(depth_threshold, depth_threshold * 2.0, lap);
+
+	vec3 cc = chroma(SCREEN_UV);
+	float hue = max(max(hue_step(cc, c, l, zl), hue_step(cc, c, r, zr)),
+			max(hue_step(cc, c, u, zu), hue_step(cc, c, dn, zd)));
+	edge = max(edge, smoothstep(color_threshold, color_threshold * 2.0, hue));
+
 	ALBEDO = outline_color.rgb;
 	ALPHA = edge * outline_color.a;
 }

@@ -2,7 +2,9 @@
 ##
 ## Lines are drawn where the view-space depth jumps by more than
 ## [member depth_threshold] metres. Two objects overlapping on screen whose
-## surfaces are closer together than that get no line between them.
+## surfaces are closer together than that get no line between them, unless
+## their hues differ by more than [member color_threshold] (leaves over trunk):
+## then the nearer one gets the line.
 class_name OutlinePostProcess
 extends Node3D
 
@@ -22,6 +24,12 @@ extends Node3D
 	set(value):
 		depth_threshold = value
 		_set_param("depth_threshold", value)
+
+## Chromaticity distance that draws a line on the nearer surface with no depth gap.
+@export var color_threshold := 0.08:
+	set(value):
+		color_threshold = value
+		_set_param("color_threshold", value)
 
 var _material: ShaderMaterial
 
@@ -43,6 +51,7 @@ func _ready() -> void:
 	_set_param("outline_color", outline_color)
 	_set_param("thickness", thickness)
 	_set_param("depth_threshold", depth_threshold)
+	_set_param("color_threshold", color_threshold)
 
 
 func _set_param(param: StringName, value: Variant) -> void:
