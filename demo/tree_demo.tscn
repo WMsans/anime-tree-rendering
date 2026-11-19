@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://40nbprgajali" path="res://demo/assets/trees/pine_a.glb" id="6_pa"]
 [ext_resource type="PackedScene" uid="uid://chstk76yatf6d" path="res://demo/assets/trees/pine_b.glb" id="7_pb"]
 [ext_resource type="Script" uid="uid://b0bim30onnm62" path="res://demo/src/cel_shading_post_process.gd" id="8_cel"]
-[ext_resource type="Script" path="res://demo/src/leaf_seed_effect.gd" id="9_seed"]
+[ext_resource type="Script" uid="uid://ikrj1caqdssx" path="res://demo/src/leaf_seed_effect.gd" id="9_seed"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.23520002, 0.4834668, 0.98, 1)
@@ -27,6 +27,14 @@ ambient_light_color = Color(0.45, 0.45, 0.45, 1)
 reflected_light_source = 1
 
 [sub_resource type="CompositorEffect" id="leaf_seed_fx"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 1
+access_resolved_color = false
+access_resolved_depth = false
+needs_motion_vectors = false
+needs_normal_roughness = true
 script = ExtResource("9_seed")
 
 [sub_resource type="Compositor" id="compositor"]
