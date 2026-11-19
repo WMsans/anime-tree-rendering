@@ -111,9 +111,9 @@ func _build_lod(lod: String, size: float, cells: Dictionary, variants: Array) ->
 				if info.materials.has(lod):
 					mmi.material_override = info.materials[lod]
 				mmi.cast_shadow = info.shadows[lod]
-				var r: Vector3 = info.ranges[lod]  # begin, end, margin
-				mmi.visibility_range_begin = maxf(0.0, r.x - r.z - half) if r.x > 0.0 else 0.0
-				mmi.visibility_range_end = r.y + r.z + half
+				var r: Vector2 = info.ranges[lod]  # begin, end
+				mmi.visibility_range_begin = maxf(0.0, r.x - half) if r.x > 0.0 else 0.0
+				mmi.visibility_range_end = r.y + half
 				mmi.set_instance_shader_parameter("lod_range", r)
 				_built.add_child(mmi)
 
@@ -121,9 +121,8 @@ func _build_lod(lod: String, size: float, cells: Dictionary, variants: Array) ->
 func _variant_info(ps: PackedScene) -> Dictionary:
 	var tree := ps.instantiate() as AnimeTree
 	var info := {id = tree.variant_id, meshes = {}, materials = {}, shadows = {}, ranges = {}}
-	var m := tree.fade_margin
-	var ranges := {LOD0 = Vector3(0.0, tree.lod0_end, m), LOD1 = Vector3(tree.lod0_end, tree.lod1_end, m),
-		Impostor = Vector3(tree.lod1_end, tree.impostor_end, m)}
+	var ranges := {LOD0 = Vector2(0.0, tree.lod0_end), LOD1 = Vector2(tree.lod0_end, tree.lod1_end),
+		Impostor = Vector2(tree.lod1_end, tree.impostor_end)}
 	for lod: String in LODS:
 		var mi := tree.get_node_or_null(lod) as MeshInstance3D
 		if mi == null:

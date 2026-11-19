@@ -22,7 +22,6 @@ varying float v_line;
 varying float v_blotch;
 
 void vertex() {
-	v_main_cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
 	if (lod_out_of_range(MODEL_MATRIX[3].xyz, MAIN_CAM_INV_VIEW_MATRIX[3].xyz)) {
 		VERTEX = vec3(0.0); // whole instance out of its LOD range: collapse, skip the rest
 	} else {
@@ -37,14 +36,11 @@ vec3 trunk_color(int band, float moss, float line) {
 }
 
 void fragment() {
-	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
-		discard;
-	}
 	float m = v_moss_attr * 0.7 + cel_noise(v_obj * 1.3) * 0.5;
 	v_moss = step(moss_threshold + 0.25, m);
 	v_line = step(0.5, texture(bark_lines, UV * vec2(bark_u_repeat, 1.0)).r) * (1.0 - v_moss);
 	v_blotch = step(blotch_threshold, cel_noise(v_obj * blotch_scale + 7.0));
-	ROUGHNESS = 0.5;
+	ROUGHNESS = 0.95; // outside the foliage blob-id range (outline.glsl)
 	ALBEDO = vec3(1.0);
 	if (anime_tree_bake_mode == 1) {
 		ALBEDO = vec3(0.0);

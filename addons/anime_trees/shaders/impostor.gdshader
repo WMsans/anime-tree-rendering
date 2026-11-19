@@ -53,7 +53,6 @@ vec2 frame_local_uv(vec2 frame, vec3 cam, vec3 p) {
 }
 
 void vertex() {
-	v_main_cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
 	if (lod_out_of_range(MODEL_MATRIX[3].xyz, MAIN_CAM_INV_VIEW_MATRIX[3].xyz)) {
 		VERTEX = vec3(0.0); // whole instance out of its LOD range: collapse, skip the rest
 	} else {
@@ -66,8 +65,9 @@ void vertex() {
 	vec3 cam_obj = (inv_mv * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	vec2 g = hemi_dir_to_uv(normalize(cam_obj - impostor_center)) * float(FRAMES) - 0.5;
 	vec2 g0 = clamp(floor(g), vec2(0.0), vec2(float(FRAMES - 1)));
-	// Sharpened bilinear weights: one frame most of the time, dithered only near the switch.
-	vec2 f = clamp((g - g0 - 0.5) * 4.0 + 0.5, 0.0, 1.0);
+	// Nearest frame only (one-hot weights): no per-pixel dither between frames, which
+	// shimmered as the camera moved. The frame pops at the switch instead.
+	vec2 f = step(vec2(0.5), g - g0);
 	vec2 g1 = min(g0 + 1.0, vec2(float(FRAMES - 1)));
 	vec2 fr[4] = vec2[](g0, vec2(g1.x, g0.y), vec2(g0.x, g1.y), g1);
 	v_weights = vec4((1.0 - f.x) * (1.0 - f.y), f.x * (1.0 - f.y), (1.0 - f.x) * f.y, f.x * f.y);
@@ -85,9 +85,6 @@ void fragment() {
 	// atlas uv jump between frames, which would make implicit derivatives pick a tiny mip.
 	vec2 grad_x = dFdx(v_uv01.xy) / float(FRAMES);
 	vec2 grad_y = dFdy(v_uv01.xy) / float(FRAMES);
-	if (lod_discard(MODEL_MATRIX[3].xyz, v_main_cam, FRAGCOORD.xy)) {
-		discard;
-	}
 	// One frame per pixel, chosen by ordered dither against the weights: crisp, no ghosting.
 	float n = fract(bayer4(FRAGCOORD.xy) + 0.5);
 	vec4 cw = vec4(v_weights.x, v_weights.x + v_weights.y, v_weights.x + v_weights.y + v_weights.z, 2.0);

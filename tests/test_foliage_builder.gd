@@ -48,3 +48,23 @@ func test_load_clumps() -> void:
 	var clumps := FoliageBuilder.load_clumps(path)
 	check(clumps.size() == raw.clumps.size(), "count")
 	check(clumps[0].center is Vector3, "center type")
+
+
+func test_blob_groups() -> void:
+	var clumps := FoliageBuilder.load_clumps("res://assets/trees/broadleaf_001.clumps.json")
+	var g := FoliageBuilder.blob_groups(clumps, 7)
+	check(g.size() == clumps.size(), "one group per clump")
+	var used := {}
+	for x in g:
+		check(x >= 0 and x < 7, "group %d out of range" % x)
+		used[x] = true
+	check(used.size() == 7, "all blobs used: %d" % used.size())
+	# Group index rides in UV2.x above the atlas cell; cards sorted bottom -> top per clump.
+	var a := _arrays()
+	var uv2: PackedVector2Array = a[Mesh.ARRAY_TEX_UV2]
+	var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+	for i in uv2.size():
+		check(fmod(uv2[i].x, 4.0) <= 3.0, "cell")
+	for card in 59:
+		if card % 20 != 19:
+			check(v[card * 4].y <= v[card * 4 + 4].y, "card %d not sorted by height" % card)

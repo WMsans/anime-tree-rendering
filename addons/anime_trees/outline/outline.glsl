@@ -3,8 +3,9 @@
 // Ink outline. Depth edges: second derivative of reverse-Z NDC depth (zero on planes,
 // so ground at grazing angles stays clean), only on the nearer side of a step, so the ink
 // takes the color of the object in front. Normal edges: one-sided (+x/+y) to keep width.
-// Id edges: foliage writes a per-clump id as roughness; where it changes, the nearer pixel
-// gets ink, so neighbouring clumps at almost equal depth still get separated (refs 1, 2).
+// Id edges: foliage writes a per-blob id (group of clumps) as roughness in [0.1, 0.875];
+// where it changes, the nearer pixel gets ink. Inside one blob depth and normal edges are
+// skipped, so only blob outlines are inked, not every clump (refs 1, 8).
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -33,6 +34,10 @@ vec4 normal_rough_at(ivec2 c) {
 	return vec4(normalize(nr.xyz * 2.0 - 1.0), r / (127.0 / 255.0));
 }
 
+bool is_foliage(float r) {
+	return r > 0.09 && r < 0.9;
+}
+
 void main() {
 	ivec2 px = ivec2(gl_GlobalInvocationID.xy);
 	if (any(greaterThanEqual(px, ivec2(p.size)))) {
@@ -46,19 +51,21 @@ void main() {
 	// Impostor flag: baked ink inside, but it vanishes under minification, so they still
 	// take depth (silhouette / clump-step) edges at screen width here; no normal edges.
 	bool imp = nr.w > 0.99;
+	bool fol = is_foliage(nr.w);
 	int w = max(1, int(round(p.width)));
 	const ivec2 dirs[4] = ivec2[](ivec2(1, 0), ivec2(0, 1), ivec2(1, 1), ivec2(1, -1));
 	bool edge = false;
 	for (int i = 0; i < 4 && !edge; i++) {
 		ivec2 o = dirs[i] * w;
-		float lap = 2.0 * d - depth_at(px + o) - depth_at(px - o);
-		edge = lap / d > p.depth_threshold;
-		if (!edge && i < 2 && !imp) {
-			ivec2 q = px + dirs[i] * w;
-			if (depth_at(q) > 0.0) {
-				vec4 nq = normal_rough_at(q);
-				edge = nq.w <= 0.99 && 1.0 - dot(nr.xyz, nq.xyz) > p.normal_threshold;
-			}
+		vec4 na = normal_rough_at(px + o);
+		bool same_a = fol && abs(na.w - nr.w) < 0.012;
+		bool same_b = fol && abs(normal_rough_at(px - o).w - nr.w) < 0.012;
+		if (!(same_a && same_b)) {
+			float lap = 2.0 * d - depth_at(px + o) - depth_at(px - o);
+			edge = lap / d > p.depth_threshold;
+		}
+		if (!edge && i < 2 && !imp && !same_a && depth_at(px + o) > 0.0) {
+			edge = na.w <= 0.99 && 1.0 - dot(nr.xyz, na.xyz) > p.normal_threshold;
 		}
 	}
 	for (int i = 0; i < 4 && !edge; i++) {

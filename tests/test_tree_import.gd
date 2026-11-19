@@ -24,23 +24,22 @@ func test_scene_structure() -> void:
 
 
 func test_visibility_ranges() -> void:
-	# Ranges overlap by fade_margin; the shaders dither-crossfade inside the overlap
-	# (Godot's own fade is alpha-blended, which breaks depth/normal and so the outline).
+	# Hard LOD switch in the shaders (lod_range); visibility ranges only pre-cull, widened so
+	# they never cut before the shader does. No fade (Godot's is alpha-blended -> breaks outline).
 	tree = _load()
 	tree.apply_lod()
-	var m: float = tree.fade_margin
 	var l0: GeometryInstance3D = tree.get_node("LOD0")
 	var l1: GeometryInstance3D = tree.get_node("LOD1")
 	var im: GeometryInstance3D = tree.get_node("Impostor")
-	check(near(l0.visibility_range_end, tree.lod0_end + m), "LOD0 end")
-	check(near(l1.visibility_range_begin, tree.lod0_end - m), "LOD1 begin")
-	check(near(l1.visibility_range_end, tree.lod1_end + m), "LOD1 end")
-	check(near(im.visibility_range_begin, tree.lod1_end - m), "Impostor begin")
-	check(near(im.visibility_range_end, tree.impostor_end), "Impostor end")
+	check(l0.visibility_range_end >= tree.lod0_end, "LOD0 end")
+	check(l1.visibility_range_begin <= tree.lod0_end, "LOD1 begin")
+	check(l1.visibility_range_end >= tree.lod1_end, "LOD1 end")
+	check(im.visibility_range_begin <= tree.lod1_end, "Impostor begin")
+	check(im.visibility_range_end >= tree.impostor_end, "Impostor end")
 	for g in [l0, l1, im]:
 		check(g.visibility_range_fade_mode == GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED, "fade mode")
-	check(l0.get_instance_shader_parameter("lod_range") == Vector3(0.0, tree.lod0_end, m), "LOD0 lod_range")
-	check(l1.get_instance_shader_parameter("lod_range") == Vector3(tree.lod0_end, tree.lod1_end, m), "LOD1 lod_range")
+	check(l0.get_instance_shader_parameter("lod_range") == Vector2(0.0, tree.lod0_end), "LOD0 lod_range")
+	check(l1.get_instance_shader_parameter("lod_range") == Vector2(tree.lod0_end, tree.lod1_end), "LOD1 lod_range")
 	check(tree.lod0_end > 30.0, "banyan LOD distance multiplier applied: %f" % tree.lod0_end)
 	tree.free()
 
@@ -87,12 +86,3 @@ func _surface_aabb(mesh: ArrayMesh, s: int) -> AABB:
 	for p in v:
 		a = a.expand(p)
 	return a
-
-
-func test_zero_fade_margin_keeps_lod_logic() -> void:
-	# lod_range.z <= 0 means "no LOD logic" in the shaders; a zero margin must still hard-switch.
-	tree = _load("broadleaf_001")
-	tree.fade_margin = 0.0
-	var lr: Vector3 = tree.get_node("LOD0").get_instance_shader_parameter("lod_range")
-	check(lr.z > 0.0, "fade_margin 0 disabled LOD culling: %s" % lr)
-	tree.free()

@@ -10,9 +10,6 @@ extends Node3D
 	set(v): lod1_end = v; apply_lod()
 @export var impostor_end := 2000.0:
 	set(v): impostor_end = v; apply_lod()
-## Crossfade band (m). Clamped > 0: a zero lod_range margin means "no LOD logic" in the shaders.
-@export var fade_margin := 4.0:
-	set(v): fade_margin = maxf(v, 0.01); apply_lod()
 @export var impostor_set: ImpostorSet:
 	set(v): impostor_set = v; _apply_impostor()
 @export var variant_id := ""
@@ -32,11 +29,10 @@ func _apply_impostor() -> void:
 	imp.visible = mat != null
 
 
-## Visibility ranges overlap by fade_margin; inside the overlap the shaders dither-crossfade
-## (lod_range instance uniform). Godot's own fade is alpha-blended, which would drop the
-## trees out of the depth/normal buffers and so out of the outline.
+## Hard LOD switch in the shaders (lod_range, distance to the tree origin). Godot's visibility
+## ranges measure to the AABB center instead, so they are widened by the AABB size and only
+## pre-cull; the shader cut is exact, so LODs never overlap or leave a gap.
 func apply_lod() -> void:
-	var m := fade_margin
 	var ranges := {
 		"LOD0": Vector2(0.0, lod0_end),
 		"LOD1": Vector2(lod0_end, lod1_end),
@@ -47,9 +43,10 @@ func apply_lod() -> void:
 		if g == null:
 			continue
 		var r: Vector2 = ranges[n]
-		g.visibility_range_begin = maxf(0.0, r.x - m) if r.x > 0.0 else 0.0
-		g.visibility_range_end = r.y + m if n != "Impostor" else r.y
+		var slack := 2.0 * g.get_aabb().size.length()  # x2 covers tree scales up to 2
+		g.visibility_range_begin = maxf(0.0, r.x - slack) if r.x > 0.0 else 0.0
+		g.visibility_range_end = r.y + slack
 		g.visibility_range_begin_margin = 0.0
 		g.visibility_range_end_margin = 0.0
 		g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
-		g.set_instance_shader_parameter("lod_range", Vector3(r.x, r.y, m))
+		g.set_instance_shader_parameter("lod_range", r)

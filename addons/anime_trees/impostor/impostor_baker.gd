@@ -145,7 +145,7 @@ func _bake_variant(tree: AnimeTree, dir: String, existing: ShaderMaterial) -> Sh
 	var lod0: GeometryInstance3D = tree.get_node("LOD0")
 	lod0.visibility_range_begin = 0.0
 	lod0.visibility_range_end = 0.0
-	lod0.set_instance_shader_parameter("lod_range", Vector3(0.0, 1e9, 0.0))
+	lod0.set_instance_shader_parameter("lod_range", Vector2(0.0, 1e9))
 	var aabb: AABB = lod0.mesh.get_aabb()
 	var c := aabb.get_center()
 	var r := aabb.size.length() * 0.5

@@ -54,12 +54,9 @@ float cel_noise(vec3 x) {
 
 // LOD distances always use the MAIN camera (MAIN_CAM_INV_VIEW_MATRIX), also in shadow
 // passes, so far LOD0 trees don't render into the shadow cascades.
-varying vec3 v_main_cam;
-
-// Dithered LOD crossfade. lod_range = (begin, end, margin) set per node by AnimeTree/Forest.
-// A LOD keeps a pixel where fade_in >= 1 - t and fade_out > t, so two neighbouring LODs
-// partition the pixels exactly (no holes, no double coverage) inside the overlap.
-instance uniform vec3 lod_range = vec3(0.0, 1e9, 0.0);
+// Hard LOD switch. lod_range = (begin, end) set per node by AnimeTree/Forest; a LOD draws
+// while begin <= distance(origin, main camera) < end, so neighbours never overlap or gap.
+instance uniform vec2 lod_range = vec2(0.0, 1e9);
 
 float bayer4(vec2 frag) {
 	ivec2 p = ivec2(frag) & ivec2(3);
@@ -67,25 +64,9 @@ float bayer4(vec2 frag) {
 	return (m[p.y * 4 + p.x] + 0.5) / 16.0;
 }
 
-bool lod_discard(vec3 origin, vec3 cam, vec2 frag) {
-	float m = lod_range.z;
-	if (m <= 0.0) {
-		return false;
-	}
-	float d = distance(origin, cam);
-	float fin = lod_range.x > 0.0 ? smoothstep(lod_range.x - m, lod_range.x + m, d) : 1.0;
-	float fout = 1.0 - smoothstep(lod_range.y - m, lod_range.y + m, d);
-	float t = bayer4(frag);
-	return fin < 1.0 - t || fout <= t;
-}
-
-// Whole-instance cull for MultiMesh cells (cell ranges are widened by the cell radius).
+// Whole-instance cull (Godot's visibility ranges are only a coarse, widened pre-cull).
 // Callers collapse VERTEX to a point -> degenerate triangles, nothing rasterized.
 bool lod_out_of_range(vec3 origin, vec3 cam) {
-	float m = lod_range.z;
-	if (m <= 0.0) {
-		return false;
-	}
 	float d = distance(origin, cam);
-	return d > lod_range.y + m || (lod_range.x > 0.0 && d < lod_range.x - m);
+	return d >= lod_range.y || d < lod_range.x;
 }
