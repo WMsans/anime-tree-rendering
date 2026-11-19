@@ -11,9 +11,10 @@ uniform float clump_radius = 4.0;
 global uniform float leaf_bump_px;
 
 // Row of n semicircles around the turn, cusps between: the scallop pass grows the
-// edge by this height, so the grown edge is a row of round scallops.
+// edge by this height, so the grown edge is a row of round scallops. Peaks sit at
+// a = TAU * k / n, so every peak of n is also a peak of 2n.
 float semicircles(float a, float n) {
-	float u = fract(a * n / TAU) * 2.0 - 1.0;
+	float u = fract(a * n / TAU + 0.5) * 2.0 - 1.0;
 	return sqrt(1.0 - u * u);
 }
 
@@ -30,17 +31,17 @@ void fragment() {
 		vec2 d = VERTEX.xy / -VERTEX.z - c.xy / -c.z;
 		float phase = fract(sin(dot(NODE_POSITION_WORLD, vec3(12.9898, 78.233, 37.719))) * 43758.5453) * TAU;
 		float a = atan(d.y, d.x) + phase;
-		// Bumps are leaf_bump_px in radius on screen whatever the distance: the
-		// clump's on-screen circumference sets the bump count. Blend the two nearest
-		// whole counts (whole: no seam where atan wraps) so bumps morph instead of
-		// popping as the camera dollies.
+		// Bumps stay near leaf_bump_px on screen: the clump's on-screen circumference
+		// picks the bump count. Only powers of two, blended like mip levels: peaks of
+		// n are peaks of 2n too, so existing bumps never slide around the clump as
+		// the camera dollies; new ones grow in between. Size stays within 2x.
 		float ppm = 0.5 * VIEWPORT_SIZE.y * abs(PROJECTION_MATRIX[1][1]) / -c.z;
 		float r_px = clump_radius * length(MODEL_MATRIX[0].xyz) * ppm;
-		// Capped: with the camera right at the clump origin ppm blows up and
-		// thousands of bumps would read as noise.
-		float n = clamp(TAU * r_px / (2.0 * leaf_bump_px), 3.0, 64.0);
-		float n0 = floor(n);
-		profile = mix(semicircles(a, n0), semicircles(a, n0 + 1.0), n - n0);
+		// Capped at 4..64 bumps: with the camera right at the clump origin ppm blows
+		// up and thousands of bumps would read as noise.
+		float level = clamp(log2(TAU * r_px / (2.0 * leaf_bump_px)), 2.0, 6.0);
+		float n0 = exp2(floor(level));
+		profile = mix(semicircles(a, n0), semicircles(a, 2.0 * n0), fract(level));
 	}
 	ROUGHNESS = 0.25 + 0.5 * profile;
 }

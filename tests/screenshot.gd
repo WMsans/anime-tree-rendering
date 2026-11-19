@@ -1,9 +1,10 @@
 ## Renders tree_demo from a few camera positions and saves <out_prefix>_<n>.png:
-## 0 default, 1 moved 1 m on x (crawl check), 2 close to TreeB, 3 close moved 0.3 m.
+## 0 default, 1 moved 1 m on x (crawl check), 2 close to TreeB, 3 close moved 0.3 m,
+## 4 close dollied 0.6 m back (crawl check for the bump count).
 ## godot --path . --script tests/screenshot.gd -- <out_prefix>
 extends SceneTree
 
-const SHOTS := [Vector3(0, 5, 24), Vector3(1, 5, 24), Vector3(0.5, 4.5, 3), Vector3(0.8, 4.5, 3)]
+const SHOTS := [Vector3(0, 5, 24), Vector3(1, 5, 24), Vector3(0.5, 4.5, 3), Vector3(0.8, 4.5, 3), Vector3(0.5, 4.5, 3.6)]
 
 
 func _initialize() -> void:
